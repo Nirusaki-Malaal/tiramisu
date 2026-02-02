@@ -7,3 +7,8 @@ def is_strong_password(password):
 def check_username(username: str):
     pattern = r'^[a-zA-Z][a-zA-Z0-9_]{2,19}$'
     return bool(re.match(pattern, username))
+
+def check_email(email:str):
+    pattern = r"^25(bar|bcs|bec|bee|bme|bce|bch|bma|bph|bms|dcs|dec)[0-9]{3}@nith\.ac\.in$"
+    return bool(re.match(pattern, email))
+

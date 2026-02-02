@@ -5,7 +5,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from pymongo import MongoClient
 from dotenv import load_dotenv
 from plugins.database import Users
-from plugins.devtools import is_strong_password, check_username
+from plugins.email import send_email
+from plugins.devtools import is_strong_password, check_username, check_email
 import os
 from bson import ObjectId
 
@@ -18,6 +19,9 @@ class Secrets():
     DATABASE_URL = os.environ.get('DATABASE_URL')
     USERNAME = os.environ.get("USERNAME")
     SECRET_KEY = os.environ.get("SECRET_KEY")
+    EMAIL = os.environ.get("EMAIL")
+    APP_PASSWORD = os.environ.get("APP_PASSWORD")
+
 ## CREATING Flask Object with Cross Origin Request Sharing
 
 app = Flask(__name__)
@@ -56,7 +60,7 @@ udb = Users(users)
 def home():
     if current_user.is_authenticated:
         return redirect(url_for("dashboard"))
-    return render_template("index.html")
+    return render_template("index.html") # homepage.html
 
 @app.route("/register" , methods=["POST"])
 def register():
@@ -64,10 +68,17 @@ def register():
         username = request.form.get("username").strip().lower() ## empty none checks bhi add karo
         if not check_username(username):
             return "Invalid username"
+        if not check_email(request.form.get("email").strip().lower()):
+            return "Invalid email"
         if not udb.check_username(username):
             password = request.form.get("password").strip()
             if not is_strong_password(password):
                 return "Password must be 8-20 chars, include uppercase, lowercase, number & special character"
+            try:
+               email = request.form.get("email").strip().lower()
+               otp = send_email(Secrets.EMAIL, Secrets.APP_PASSWORD, email)
+            except Exception as e:
+                return f"Error sending email: {str(e)}"
             hashed_password = generate_password_hash(password, method="pbkdf2:sha256")
             try:
                 id=udb.add_user(username=username, password=hashed_password)
