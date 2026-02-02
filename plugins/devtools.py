@@ -1,0 +1,9 @@
+import re
+
+def is_strong_password(password):
+    PASSWORD_REGEX = re.compile(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,64}$")
+    return bool(PASSWORD_REGEX.match(password))
+
+def check_username(username: str):
+    pattern = r'^[a-zA-Z][a-zA-Z0-9_]{2,19}$'
+    return bool(re.match(pattern, username))
