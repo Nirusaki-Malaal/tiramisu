@@ -313,3 +313,35 @@
         });
 
         document.querySelectorAll('.reveal-hidden').forEach((el) => observer.observe(el));
+
+        
+
+
+        const submit_button = document.getElementById("submit-button-1");
+        const auth_form = document.getElementById("auth-form");
+
+        async function getData(username, email,password) {
+            const head = {method: "POST", headers:{"Content-Type": "application/json"}, body:`{"username":"${username}", "email":"${email}", "password":"${password}"}`};
+            const response = await fetch("/signup", head);
+            console.log(response);
+        }
+
+        async function handleformsubmit(e)
+        {
+            e.preventDefault();// avoid page reload
+            const email = document.getElementById("email").value;
+            const username = document.getElementById('username').value;
+            const password = document.getElementById("password").value;
+
+            // Simple validation
+            if(!email || !password || (currentAuthMode === 'signup' && !username)) {
+                alert("Please Fill In All Fields");
+                return;
+            }
+            await getData(username, email,password);
+
+        }
+
+        submit_button.addEventListener("click", handleformsubmit);
+
+        

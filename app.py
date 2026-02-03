@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, request, redirect
+from flask import Flask, render_template, url_for, request, redirect, jsonify
 from flask_cors import CORS
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -60,9 +60,9 @@ udb = Users(users)
 def home():
     if current_user.is_authenticated:
         return redirect(url_for("dashboard"))
-    return render_template("index.html") # homepage.html
+    return render_template("homepage.html") # homepage.html
 
-@app.route("/register" , methods=["POST"])
+@app.route("/register_old" , methods=["POST"])
 def register():
     if request.method == "POST":
         username = request.form.get("username").strip().lower() ## empty none checks bhi add karo
@@ -89,6 +89,32 @@ def register():
                 return str(e)
         else:
             return "Already Registered"
+
+
+@app.route("/signup", methods=["POST"])
+def signup():
+    if request.method == "POST":
+        print("Signup request received")
+        credentials = request.get_json()
+        print(credentials)
+        username = credentials.get("username").strip().lower()
+        email = credentials.get("email").strip().lower()
+        print(username)
+        if not check_username(username):
+            return jsonify({"error": "Invalid username"})
+        if not check_email(email):
+            return jsonify({"error": "Invalid email"})
+        if not is_strong_password(credentials.get("password").strip()):
+            return jsonify({"error": "Password must be 8-20 chars, include uppercase, lowercase, number & special character"})
+        if not udb.check_username(username):
+            try:
+                email = credentials.get("email").strip().lower()
+                otp = send_email(Secrets.EMAIL, Secrets.APP_PASSWORD, email)
+                return jsonify({"otp": otp})
+            except Exception as e:
+                return jsonify({"error": f"Error sending email: {str(e)}"})
+        else:
+            return jsonify({"error": "Already Registered"})
         
 @app.route("/dashboard")
 def dashboard():
