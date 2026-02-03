@@ -7,8 +7,22 @@ from dotenv import load_dotenv
 from plugins.database import Users
 from plugins.email import send_email
 from plugins.devtools import is_strong_password, check_username, check_email
-import os
+import os, asyncio, time
+from threading import Thread
 from bson import ObjectId
+from werkzeug.security import check_password_hash
+
+otp_handler = []
+
+async def otp_handle():
+    while True:
+        current_time = time.time()
+        for i in otp_handler:
+            if current_time - i["timestamp"] > 300:  # 5 minutes
+                    otp_handler.remove(i)
+        await asyncio.sleep(60)
+
+
 
 ## SECRETS
 
@@ -43,7 +57,8 @@ class User(UserMixin):
     def __init__(self, user_doc):
         self.id = str(user_doc["_id"])
         self.username = user_doc["username"]
-
+        self.email = user_doc["email"]
+        self.password = user_doc["password"]
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -52,9 +67,32 @@ def load_user(user_id):
         return User(us)
     return None
 
+
 ## DATABASE class
 udb = Users(users)
 
+@app.route("/verify-otp", methods=["POST"])
+def verify_otp():
+ try:
+    if request.method == "POST": 
+     data = request.get_json()
+     print(data)
+     for i in otp_handler:
+         if i["username"] == data.get("username").lower().strip() and int(i["otp"]) == int(data.get("otp")) and (time.time() - i["timestamp"]) <=300 and i["email"] == data.get("email").lower().strip():
+             try:
+                    id=udb.add_user(username=i["username"], password=i["hashed_password"], email=i["email"])
+                    user = User({"_id":id,"username":i["username"].lower().strip(), "email":i["email"].lower().strip(), "password":i["hashed_password"]})
+                    login_user(user)    
+                    otp_handler.remove(i)
+                    print("OTP verified and user logged in")
+                    return jsonify({"status":"success", "message":"OTP_VERIFIED"})
+             except Exception as e:
+                return jsonify({"status":"error", "message":"DB_ERROR_OR_OTP_EXPIRED"})
+         else:
+             return jsonify({"status":"error", "message":"DB_ERROR_OR_OTP_EXPIRED"})
+ except Exception as e:
+        return jsonify({"status":"error", "message":"DB_ERROR_OR_OTP_EXPIRED"})
+     
 ## ROUTING CODE
 @app.route("/")
 def home():
@@ -77,6 +115,8 @@ def register():
             try:
                email = request.form.get("email").strip().lower()
                otp = send_email(Secrets.EMAIL, Secrets.APP_PASSWORD, email)
+               hashed_password = generate_password_hash(password, method="pbkdf2:sha256")
+               otp_handler.append({"username": username, "email": email, "otp": otp , "hashed_password":hashed_password, "timestamp": time.time()})
             except Exception as e:
                 return f"Error sending email: {str(e)}"
             hashed_password = generate_password_hash(password, method="pbkdf2:sha256")
@@ -90,6 +130,24 @@ def register():
         else:
             return "Already Registered"
 
+@app.route("/login" , methods=["POST"])
+def login():
+  try:
+    if request.method == "POST":
+        print("Login Request Recieved")
+        credentials = request.get_json()
+        email = credentials.get("email").strip().lower()
+        password = credentials.get("password").strip()
+        usar = udb.get_user(email=email)
+        if usar and check_password_hash(usar.get("password"), password):    
+            user1 = User(usar)
+            login_user(user1)
+            print("User logged in")
+            return jsonify({"status":"success", "message":"LOGGED_IN"})
+        else:
+            return jsonify({"status":"error"})
+  except Exception as e:
+        print(e)
 
 @app.route("/signup", methods=["POST"])
 def signup():
@@ -99,22 +157,38 @@ def signup():
         print(credentials)
         username = credentials.get("username").strip().lower()
         email = credentials.get("email").strip().lower()
-        print(username)
-        if not check_username(username):
-            return jsonify({"error": "Invalid username"})
-        if not check_email(email):
-            return jsonify({"error": "Invalid email"})
-        if not is_strong_password(credentials.get("password").strip()):
-            return jsonify({"error": "Password must be 8-20 chars, include uppercase, lowercase, number & special character"})
+        password = credentials.get("password").strip()
         if not udb.check_username(username):
             try:
                 email = credentials.get("email").strip().lower()
                 otp = send_email(Secrets.EMAIL, Secrets.APP_PASSWORD, email)
-                return jsonify({"otp": otp})
+                hashed_password = generate_password_hash(password, method="pbkdf2:sha256")
+                otp_handler.append({"username": username, "email": email, "otp": otp , "hashed_password":hashed_password, "timestamp": time.time()})
+                return jsonify({"otp": "sent"}) ## otp sent
             except Exception as e:
                 return jsonify({"error": f"Error sending email: {str(e)}"})
         else:
             return jsonify({"error": "Already Registered"})
+        
+@app.route("/username_check", methods=["POST"])
+def username_check():
+    if request.method == "POST":
+        data = request.get_json()
+        username = data.get("username").strip().lower()
+        if udb.check_username(username):
+            return jsonify({"status": "TAKEN"}) ## username taken
+        else:
+            return jsonify({"status": "NOT_TAKEN"}) ## username available
+@app.route("/email_check", methods=["POST"])
+def email_check():
+    if request.method == "POST":
+        data = request.get_json()
+        print(data)
+        email = data.get("email").strip().lower()
+        if udb.check_email(email):
+            return jsonify({"status": "TAKEN"})
+        else:
+            return jsonify({"status": "NOT_TAKEN"})
         
 @app.route("/dashboard")
 def dashboard():
@@ -130,7 +204,8 @@ def logout():
         logout_user()
         return redirect("/")
 
+def start_otp_bg():
+    asyncio.run(otp_handle())
 
-
-if __name__ == "__main__":
-    app.run(debug=True)
+Thread(target=start_otp_bg, daemon=True).start()
+app.run(debug=True)

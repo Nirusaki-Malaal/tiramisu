@@ -1,4 +1,5 @@
 flask
+flask[async]
 flask_cors
 flask_login
 pymongo

@@ -67,24 +67,41 @@
         let currentAuthMode = 'signup';
 
         function openAuthModal(mode) {
+            ['username', 'email', 'password'].forEach(id => document.getElementById(`err-${id}`).classList.add('hidden'));
             authModal.classList.add('open');
             switchAuthTab(mode);
         }
 
         function closeAuthModal() {
+            ['username', 'email', 'password'].forEach(id => document.getElementById(`err-${id}`).classList.add('hidden'));
             authModal.classList.remove('open');
         }
 
         function switchAuthTab(mode) {
             currentAuthMode = mode;
+            isOtpStep = false; // Reset OTP step
+            ['username', 'email', 'password'].forEach(id => document.getElementById(`err-${id}`).classList.add('hidden'));
+            // Reset UI visibility
+            document.getElementById('field-username').classList.remove('hidden');
+            document.getElementById('group-email').classList.remove('hidden');
+            document.getElementById('group-password').classList.remove('hidden');
+            document.getElementById('field-confirm-password').classList.remove('hidden'); // Show confirm pass
+            document.getElementById('group-remember').classList.remove('hidden');
+            document.getElementById('group-otp').classList.add('hidden');
+            // Reset inputs validity/errors
+            document.querySelectorAll('.text-red-500').forEach(el => el.classList.add('hidden'));
+
             if(mode === 'login') {
                 tabLogin.classList.add('border-orange-500', 'text-orange-500');
                 tabLogin.classList.remove('border-transparent');
                 tabSignup.classList.remove('border-orange-500', 'text-orange-500');
                 tabSignup.classList.add('border-transparent');
                 
-                fieldUsername.classList.add('hidden');
+                document.getElementById('field-username').classList.add('hidden');
+                document.getElementById('field-confirm-password').classList.add('hidden'); // Hide confirm pass
                 document.getElementById('username').removeAttribute('required');
+                document.getElementById('confirm-password').removeAttribute('required');
+                
                 submitText.textContent = "LOG IN";
             } else {
                 tabSignup.classList.add('border-orange-500', 'text-orange-500');
@@ -92,42 +109,29 @@
                 tabLogin.classList.remove('border-orange-500', 'text-orange-500');
                 tabLogin.classList.add('border-transparent');
                 
-                fieldUsername.classList.remove('hidden');
+                // Ensure username is visible for signup
+                document.getElementById('field-username').classList.remove('hidden');
+                document.getElementById('field-confirm-password').classList.remove('hidden');
                 document.getElementById('username').setAttribute('required', 'true');
+                document.getElementById('confirm-password').setAttribute('required', 'true');
+                
                 submitText.textContent = "INITIATE SIGN UP";
             }
         }
-
-        function handleAuth(e) {
-            e.preventDefault();
+        function togglePassword(fieldId, btn) {
+            const input = document.getElementById(fieldId);
+            const eyeOpen = btn.querySelector('.eye-open');
+            const eyeClosed = btn.querySelector('.eye-closed');
             
-            const email = document.getElementById('email').value;
-            const username = document.getElementById('username').value;
-            
-            // Simulate API call with timeout
-            submitText.textContent = "CONNECTING...";
-            
-            setTimeout(() => {
-                closeAuthModal();
-                const displayName = currentAuthMode === 'login' ? email.split('@')[0] : username;
-                
-                // Update UI to logged in state
-                authSection.innerHTML = `
-                    <div class="flex items-center gap-3">
-                         <div class="text-right hidden md:block">
-                             <div class="text-xs text-gray-400 tracking-widest">RANK 10 / <span class="font-jp">第十席</span></div>
-                             <div class="font-bold theme-text-primary uppercase">${displayName}</div>
-                         </div>
-                         <div class="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold text-xl">
-                             ${displayName[0].toUpperCase()}
-                         </div>
-                    </div>
-                `;
-                
-                // Reset form
-                document.getElementById('auth-form').reset();
-                submitText.textContent = currentAuthMode === 'login' ? "LOG IN" : "INITIATE SIGN UP";
-            }, 1000);
+            if (input.type === 'password') {
+                input.type = 'text';
+                eyeOpen.classList.add('hidden');
+                eyeClosed.classList.remove('hidden');
+            } else {
+                input.type = 'password';
+                eyeOpen.classList.remove('hidden');
+                eyeClosed.classList.add('hidden');
+            }
         }
 
 
@@ -320,26 +324,218 @@
         const submit_button = document.getElementById("submit-button-1");
         const auth_form = document.getElementById("auth-form");
 
-        async function getData(username, email,password) {
+        async function getData(username, email,password) 
+        {
             const head = {method: "POST", headers:{"Content-Type": "application/json"}, body:`{"username":"${username}", "email":"${email}", "password":"${password}"}`};
             const response = await fetch("/signup", head);
             console.log(response);
         }
 
+        function check_username(username) 
+        {
+            const USERNAME_REGEX = /^[a-zA-Z][a-zA-Z0-9_]{2,19}$/;
+            return USERNAME_REGEX.test(username);
+        }
+
+        function check_email(email) 
+        {
+            const EMAIL_REGEX = /^25(bar|bcs|bec|bee|bme|bce|bch|bma|bph|bms|dcs|dec)[0-9]{3}@nith\.ac\.in$/;
+            return EMAIL_REGEX.test(email);
+        }
+        
+        function check_password(password) 
+        {
+            const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,64}$/;
+            return PASSWORD_REGEX.test(password);
+        }
+        async function waitForClick(btn) 
+        {
+            return new Promise(resolve => {
+                btn.addEventListener("click", (e) => {
+                e.preventDefault();
+                resolve();
+                                                    }, { once: true });
+            });
+        }
+
+        async function username_check(username) {
+    const res = await fetch("/username_check", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            username: username
+        })
+    });
+
+    const response = await res.json();
+    return response.status // if false means username taken
+}
+
+
+        async function email_check(email) {
+            const res = await fetch("/email_check", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                    },
+                body: JSON.stringify({
+                    email: email
+                })
+                });
+
+    const response = await res.json();
+    return response.status // if false means email taken, true matlab email not taken
+}
+
+
         async function handleformsubmit(e)
         {
             e.preventDefault();// avoid page reload
+            if(currentAuthMode === "login")
+            {
+                const email = document.getElementById("email").value;
+                const password = document.getElementById("password").value;
+                
+                ['email', 'password'].forEach(id => document.getElementById(`err-${id}`).classList.add('hidden'));
+                let bool = false;
+                
+                if(!check_email(email))
+                {
+                const err = document.getElementById('err-email');
+                err.textContent = "INVALID EMAIL";
+                err.classList.remove('hidden');
+                bool = true;
+                }
+                if(!check_password(password))
+                {
+                const err = document.getElementById('err-password');
+                err.textContent = "Check Your Credentials";
+                err.classList.remove('hidden');
+                bool = true;
+                }
+                if (await email_check(email) === "NOT_TAKEN")
+                {
+                    const err = document.getElementById('err-email');
+                    err.textContent = "EMAIL NOT REGISTERED";
+                    err.classList.remove('hidden');
+                    bool = true;
+                }
+                if (bool)
+                {
+                    return 
+                }
+                    submitText.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-4 w-4 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg> CONNECTING...`;
+                    const head = {method: "POST", headers:{"Content-Type": "application/json"}, body:JSON.stringify({email: email, password: password})};
+                    let json = await fetch("/login", head);
+                    const result = await json.json();
+                    if(result.status === "error")
+                    {
+                        const err = document.getElementById('err-password');
+                        err.textContent = "INVALID CREDENTIALS";
+                        err.classList.remove('hidden');
+                        return;
+                    }
+                    if (result.status === "success")
+                    {
+                         window.location.href = "/dashboard";
+                    }
+                    
+                
+            }
+
             const email = document.getElementById("email").value;
             const username = document.getElementById('username').value;
             const password = document.getElementById("password").value;
+            const confirm_password = document.getElementById("confirm-password").value;
+            ['username', 'email', 'password', 'confirm-password'].forEach(id => document.getElementById(`err-${id}`).classList.add('hidden'));
+            let bool = false;
+            if(password !== confirm_password)
+                {
+                    const err = document.getElementById('err-confirm-password');
+                    err.textContent = "Passwords Don't Match";
+                    err.classList.remove('hidden');
+                    bool = true;
+                }
 
-            // Simple validation
-            if(!email || !password || (currentAuthMode === 'signup' && !username)) {
-                alert("Please Fill In All Fields");
+            if((await username_check(username)) === "TAKEN")
+            {
+                const err = document.getElementById('err-username');
+                err.textContent = "USERNAME ALREADY TAKEN";
+                err.classList.remove('hidden');
+                bool = true;
+            }
+            if(((await email_check(email))) === "TAKEN")
+            {
+                const err = document.getElementById('err-email');
+                err.textContent = "EMAIL ALREADY REGISTERED";
+                err.classList.remove('hidden');
+                bool = true;
+            }
+            if(!check_username(username))
+            {
+                const err = document.getElementById('err-username');
+                err.textContent = "3-20 CHARACTERS. LETTERS, NUMBERS & UNDERSCORES ONLY.";
+                err.classList.remove('hidden');
+                bool = true;
+            }
+            if(!check_email(email))
+            {
+                const err = document.getElementById('err-email');
+                err.textContent = "INVALID EMAIL";
+                err.classList.remove('hidden');
+                bool = true;
+            }
+            if(!check_password(password))
+            {
+                const err = document.getElementById('err-password');
+                err.textContent = "8-64 CHARS, INC. UPPER, LOWER, NUMBER & SPECIAL CHAR.";
+                err.classList.remove('hidden');
+                bool = true;
+            }
+            if(bool)
+            {
                 return;
             }
-            await getData(username, email,password);
-
+            submitText.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-4 w-4 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg> CONNECTING...`;
+            let b = await getData(username, email,password);
+            submitText.textContent = "GENERATING SPIRIT CODE...";
+            document.getElementById('field-username').classList.add('hidden');
+            document.getElementById('group-email').classList.add('hidden');
+            document.getElementById('group-password').classList.add('hidden');
+            document.getElementById('group-remember').classList.add('hidden');
+            document.getElementById('field-confirm-password').classList.add('hidden');           
+            document.getElementById('group-otp').classList.remove('hidden');
+            document.getElementById('otp').focus(); // LIKE KISI File ko single click dena
+            submitText.textContent = "VERIFY OTP";
+            submit_button.removeEventListener("click", handleformsubmit);
+            await waitForClick(submit_button); // for 300 seconds, lets assume otp is 6 digits
+            const otp = document.getElementById('otp').value;
+            submitText.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-4 w-4 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg> VERIFYING...`;
+            json = await fetch("/verify-otp", {method: "POST", headers:{"Content-Type": "application/json"}, body:JSON.stringify({username: username, email: email, otp: otp})});
+            const result = await json.json();
+            if(result.status === "error")
+            {
+                const err = document.getElementById('err-otp');
+                err.textContent = "OTP INVALID OR EXPIRED";
+                err.classList.remove('hidden');
+                return;
+            }
+            submitText.textContent = "OTP VERIFIED! REDIRECTING...";
+            if (result.status === "success")
+            {
+                 window.location.href = "/dashboard";
+            }
         }
 
         submit_button.addEventListener("click", handleformsubmit);
