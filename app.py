@@ -96,8 +96,6 @@ def verify_otp():
 ## ROUTING CODE
 @app.route("/")
 def home():
-    if current_user.is_authenticated:
-        return redirect(url_for("dashboard"))
     return render_template("homepage.html") # homepage.html
 
 @app.route("/register_old" , methods=["POST"])
