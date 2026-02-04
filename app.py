@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, request, redirect, jsonify
+from flask import Flask, after_this_request, render_template, url_for, request, redirect, jsonify, session
 from flask_cors import CORS
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -6,7 +6,6 @@ from pymongo import MongoClient
 from dotenv import load_dotenv
 from plugins.database import Users
 from plugins.email import send_email
-from plugins.devtools import is_strong_password, check_username, check_email
 import os, asyncio, time
 from threading import Thread
 from bson import ObjectId
@@ -82,7 +81,7 @@ def verify_otp():
              try:
                     id=udb.add_user(username=i["username"], password=i["hashed_password"], email=i["email"])
                     user = User({"_id":id,"username":i["username"].lower().strip(), "email":i["email"].lower().strip(), "password":i["hashed_password"]})
-                    login_user(user)    
+                    login_user(user, remember=i["remember"])    
                     otp_handler.remove(i)
                     print("OTP verified and user logged in")
                     return jsonify({"status":"success", "message":"OTP_VERIFIED"})
@@ -94,39 +93,14 @@ def verify_otp():
         return jsonify({"status":"error", "message":"DB_ERROR_OR_OTP_EXPIRED"})
      
 ## ROUTING CODE
-@app.route("/")
+@app.route("/", methods=["GET", "POST"])
 def home():
-    return render_template("homepage.html") # homepage.html
-
-@app.route("/register_old" , methods=["POST"])
-def register():
-    if request.method == "POST":
-        username = request.form.get("username").strip().lower() ## empty none checks bhi add karo
-        if not check_username(username):
-            return "Invalid username"
-        if not check_email(request.form.get("email").strip().lower()):
-            return "Invalid email"
-        if not udb.check_username(username):
-            password = request.form.get("password").strip()
-            if not is_strong_password(password):
-                return "Password must be 8-20 chars, include uppercase, lowercase, number & special character"
-            try:
-               email = request.form.get("email").strip().lower()
-               otp = send_email(Secrets.EMAIL, Secrets.APP_PASSWORD, email)
-               hashed_password = generate_password_hash(password, method="pbkdf2:sha256")
-               otp_handler.append({"username": username, "email": email, "otp": otp , "hashed_password":hashed_password, "timestamp": time.time()})
-            except Exception as e:
-                return f"Error sending email: {str(e)}"
-            hashed_password = generate_password_hash(password, method="pbkdf2:sha256")
-            try:
-                id=udb.add_user(username=username, password=hashed_password)
-                user = User({"_id":id,"username":username})
-                login_user(user)
-                return redirect(url_for("dashboard"))
-            except Exception as e:
-                return str(e)
-        else:
-            return "Already Registered"
+  if request.method == "POST":
+        if current_user.is_authenticated:
+            return {"message": "LOGGED_IN", "username": current_user.username}
+        return {"message": "NOT_LOGGED_IN"}
+  if request.method == "GET":
+        return render_template("homepage.html")
 
 @app.route("/login" , methods=["POST"])
 def login():
@@ -136,10 +110,12 @@ def login():
         credentials = request.get_json()
         email = credentials.get("email").strip().lower()
         password = credentials.get("password").strip()
+        remember = credentials.get("remember")
+        print(f"Remember me: {remember}")
         usar = udb.get_user(email=email)
         if usar and check_password_hash(usar.get("password"), password):    
             user1 = User(usar)
-            login_user(user1)
+            login_user(user1, remember=remember)
             print("User logged in")
             return jsonify({"status":"success", "message":"LOGGED_IN"})
         else:
@@ -161,7 +137,7 @@ def signup():
                 email = credentials.get("email").strip().lower()
                 otp = send_email(Secrets.EMAIL, Secrets.APP_PASSWORD, email)
                 hashed_password = generate_password_hash(password, method="pbkdf2:sha256")
-                otp_handler.append({"username": username, "email": email, "otp": otp , "hashed_password":hashed_password, "timestamp": time.time()})
+                otp_handler.append({"username": username, "email": email, "otp": otp , "hashed_password":hashed_password, "timestamp": time.time(), "remember": credentials.get("remember")})
                 return jsonify({"otp": "sent"}) ## otp sent
             except Exception as e:
                 return jsonify({"error": f"Error sending email: {str(e)}"})

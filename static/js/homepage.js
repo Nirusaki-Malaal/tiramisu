@@ -60,12 +60,20 @@
         // ------------------------------------------------------------------
         const authModal = document.getElementById('auth-modal');
         const tabLogin = document.getElementById('tab-login');
+        let user_login = false;
+        let currentUserData = {username: "", rank: "", pfp: ""};
         const tabSignup = document.getElementById('tab-signup');
         const fieldUsername = document.getElementById('field-username');
         const submitText = document.getElementById('submit-text');
         const authSection = document.getElementById('auth-section');
         let currentAuthMode = 'signup';
 
+        window.addEventListener('load', () => {
+            initThreeJS();
+            getUserStatus().then(() => {
+                ifLoggedIn();
+            });
+        });
         function openAuthModal(mode) {
             ['username', 'email', 'password'].forEach(id => document.getElementById(`err-${id}`).classList.add('hidden'));
             authModal.classList.add('open');
@@ -298,7 +306,6 @@
             });
         };
 
-        window.addEventListener('load', initThreeJS);
 
 
         // ------------------------------------------------------------------
@@ -326,7 +333,7 @@
 
         async function getData(username, email,password) 
         {
-            const head = {method: "POST", headers:{"Content-Type": "application/json"}, body:`{"username":"${username}", "email":"${email}", "password":"${password}"}`};
+            const head = {method: "POST", headers:{"Content-Type": "application/json"}, body:`{"username":"${username}", "email":"${email}", "password":"${password}", "remember": ${document.getElementById("remember-me").checked}}`};
             const response = await fetch("/signup", head);
             console.log(response);
         }
@@ -430,7 +437,7 @@
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg> CONNECTING...`;
-                    const head = {method: "POST", headers:{"Content-Type": "application/json"}, body:JSON.stringify({email: email, password: password})};
+                    const head = {method: "POST", headers:{"Content-Type": "application/json"}, body:JSON.stringify({email: email, password: password, remember: document.getElementById("remember-me").checked})};
                     let json = await fetch("/login", head);
                     const result = await json.json();
                     if(result.status === "error")
@@ -442,7 +449,7 @@
                     }
                     if (result.status === "success")
                     {
-                         window.location.href = "/dashboard";
+                         location.reload()
                     }
                     
                 
@@ -534,10 +541,55 @@
             submitText.textContent = "OTP VERIFIED! REDIRECTING...";
             if (result.status === "success")
             {
-                 window.location.href = "/dashboard";
+                 location.reload()
             }
         }
 
+        function ifLoggedIn() {
+            if (user_login) {
+                // 1. Update Navigation Auth Section
+                authSection.innerHTML = `
+                    <div class="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
+                         <div class="text-right hidden md:block">
+                             <div class="text-xs text-gray-400 tracking-widest">RANK ${currentUserData.rank} / <span class="font-jp">第十席</span></div>
+                             <div class="font-bold theme-text-primary uppercase">${currentUserData.username}</div>
+                         </div>
+                         <div class="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold text-xl border-2 border-white/10 shadow-[0_0_15px_rgba(255,123,0,0.5)]">
+                             ${currentUserData.pfp}
+                         </div>
+                    </div>
+                `;
+
+                // 2. Update Hero CTA Button
+                const heroBtn = document.getElementById('hero-cta-btn');
+                const heroText = document.getElementById('hero-cta-text');
+                
+                if (heroBtn && heroText) {
+                    heroBtn.onclick = function() {
+                        // Redirect to dashboard
+                        window.location.href = '/dashboard';
+                    };
+                    heroText.textContent = "DASHBOARD";
+                    
+                    // Optional: Add a visual indicator that it's now a dashboard link
+                    heroBtn.classList.add('ring-2', 'ring-offset-2', 'ring-orange-500');
+                }
+            }
+        }
+
+        async function getUserStatus()
+        {
+            const response = await fetch("/", {method: "POST"});
+            const result = await response.json();
+            if (result.message === "LOGGED_IN")
+            {
+                user_login = true;
+                currentUserData = {username: result.username, rank: "N/A", pfp: result.username.charAt(0).toUpperCase()};
+            }
+            
+        }
         submit_button.addEventListener("click", handleformsubmit);
+
+        
 
         
