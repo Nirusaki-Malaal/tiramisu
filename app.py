@@ -171,12 +171,12 @@ def dashboard():
     else:
         return "LOGIN FIRST BITCH"
     
-@app.route("/logout", methods=["GET"])
+@app.route("/logout", methods=["POST"])
 @login_required
 def logout():
-    if request.method == "GET":
+    if request.method == "POST":
         logout_user()
-        return redirect("/")
+        return jsonify({"status": "success"})
 
 def start_otp_bg():
     asyncio.run(otp_handle())

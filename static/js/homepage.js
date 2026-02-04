@@ -545,18 +545,55 @@
             }
         }
 
+        function toggleUserDropdown() {
+            const dropdown = document.getElementById('user-dropdown');
+            if(dropdown) {
+                dropdown.classList.toggle('hidden');
+            }
+        }
+
+        function logout() {
+            fetch("/logout", {method: "POST"})
+                .then(response => response.json())
+                .then(data => {
+                    if(data.status === "success") {
+                        // Reload the page to reflect logged-out state
+                        window.location.reload();
+                    }
+                });
+        }
+
         function ifLoggedIn() {
             if (user_login) {
                 // 1. Update Navigation Auth Section
-                authSection.innerHTML = `
-                    <div class="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
-                         <div class="text-right hidden md:block">
-                             <div class="text-xs text-gray-400 tracking-widest">RANK ${currentUserData.rank} / <span class="font-jp">第十席</span></div>
-                             <div class="font-bold theme-text-primary uppercase">${currentUserData.username}</div>
-                         </div>
-                         <div class="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold text-xl border-2 border-white/10 shadow-[0_0_15px_rgba(255,123,0,0.5)]">
-                             ${currentUserData.pfp}
-                         </div>
+                authSection.innerHTML =  `
+                    <div class="relative group">
+                        <button onclick="toggleUserDropdown()" class="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity focus:outline-none text-left">
+                             <div class="text-right hidden md:block">
+                                 <div class="text-xs text-gray-400 tracking-widest">RANK ${currentUserData.rank} / <span class="font-jp">第十席</span></div>
+                                 <div class="font-bold theme-text-primary uppercase">${currentUserData.username}</div>
+                             </div>
+                             <div class="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold text-xl border-2 border-white/10 shadow-[0_0_15px_rgba(255,123,0,0.5)]">
+                                 ${currentUserData.pfp}
+                             </div>
+                        </button>
+
+                        <!-- Dropdown Menu -->
+                        <div id="user-dropdown" class="absolute right-0 mt-4 w-56 theme-bg-card border theme-border backdrop-blur-xl hidden z-50 transform origin-top-right transition-all duration-200">
+                            <!-- Decorative Corner Clip -->
+                            <div class="absolute top-0 right-0 w-3 h-3 bg-orange-500"></div>
+                            
+                            <div class="py-2">
+                                <a href="/dashboard" class="flex items-center px-6 py-3 text-sm theme-text-primary hover:bg-white/10 transition-colors tracking-widest font-bold border-b theme-border group/item">
+                                    <i data-lucide="layout-dashboard" class="w-4 h-4 mr-3 group-hover/item:text-orange-500 transition-colors"></i>
+                                    DASHBOARD
+                                </a>
+                                <button onclick="logout()" class="flex w-full items-center px-6 py-3 text-sm text-red-500 hover:bg-white/10 transition-colors tracking-widest font-bold text-left group/item">
+                                    <i data-lucide="log-out" class="w-4 h-4 mr-3 group-hover/item:text-red-400 transition-colors"></i>
+                                    LOGOUT
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 `;
 
