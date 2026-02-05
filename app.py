@@ -215,6 +215,6 @@ def update_password():
         return jsonify({"status": "success"})
     else:
         return jsonify({"status": "error"})
-
-Thread(target=start_otp_bg, daemon=True).start()
-app.run(debug=True)
+if __name__ == "__main__":
+    Thread(target=start_otp_bg, daemon=True).start()
+    app.run(debug=True)

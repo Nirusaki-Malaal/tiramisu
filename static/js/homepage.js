@@ -169,7 +169,7 @@
 
             // --- KANJI ---
             // Added Om Symbol
-            const kanjiChars = ['卍', '解', '魂', '死', '神', '虚', '斬', '力', '🕉️'];
+            const kanjiChars = ['卍', '解', '魂', '死', '神', '虚', '斬', '力', 'ॐ'];
             const kanjiObjects = []; // Store custom objects for animation logic
             
             const createKanjiTexture = (char) => {

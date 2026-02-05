@@ -56,7 +56,7 @@
             </div>
             
             <div class="hidden md:flex items-center gap-8 text-sm font-bold tracking-[0.2em] uppercase">
-                <a href="#academy" class="nav-link group"><span>Academy</span></a>
+                <a href="#academy" class="nav-link group"><span>Platform</span></a>
                 <a href="#squads" class="nav-link group"><span>Features</span></a>
                 <a href="#captains" class="nav-link group"><span>Creators</span></a>
                 
@@ -93,7 +93,7 @@
             <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-gray-500 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
             
             <div class="text-center mb-8">
-                <h2 class="text-3xl font-bold heading-font mb-2">ACCESS <span class="theme-accent-primary">TERMINAL</span></h2>
+                <h2 class="text-3xl font-bold heading-font mb-2">ACCESS <span class="theme-accent-primary">DASHBOARD</span></h2>
                 <div class="flex justify-center gap-4 text-sm tracking-widest mt-4 border-b border-white/10 pb-4">
                     <button id="tab-login" onclick="switchAuthTab('login')" class="pb-1 border-b-2 border-transparent hover:text-orange-500 transition-colors">LOG IN</button>
                     <button id="tab-signup" onclick="switchAuthTab('signup')" class="pb-1 border-b-2 border-orange-500 text-orange-500 transition-colors">SIGN UP</button>
@@ -104,21 +104,21 @@
                 <!-- Username -->
                 <div id="field-username" class="input-group mb-4">
                     <input type="text" id="username" class="auth-input" placeholder=" " required>
-                    <label for="username" class="input-label">Spirit Name</label>
+                    <label for="username" class="input-label">Username</label>
                     <p id="err-username" class="text-red-500 text-xs mt-1 hidden font-mono tracking-wider"></p>
                 </div>
 
                 <!-- Email -->
                 <div id="group-email" class="input-group mb-4">
                     <input type="email" id="email" class="auth-input" placeholder=" " required>
-                    <label for="email" class="input-label">Spirit ID (Email)</label>
+                    <label for="email" class="input-label">Student Mail</label>
                     <p id="err-email" class="text-red-500 text-xs mt-1 hidden font-mono tracking-wider"></p>
                 </div>
 
                 <!-- Password -->
                 <div id="group-password" class="input-group mb-4 relative">
                     <input type="password" id="password" class="auth-input pr-10" placeholder=" " required>
-                    <label for="password" class="input-label">Passcode <span class="font-jp ml-1">暗号</span></label>
+                    <label for="password" class="input-label">Password</label>
                     <button type="button" class="absolute right-3 top-3 text-gray-500 hover:text-white transition-colors focus:outline-none z-10" onclick="togglePassword('password', this)">
                         <svg class="w-5 h-5 eye-open" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                         <svg class="w-5 h-5 eye-closed hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>
@@ -129,7 +129,7 @@
                 <!-- Confirm Password -->
                 <div id="field-confirm-password" class="input-group mb-6 relative">
                     <input type="password" id="confirm-password" class="auth-input pr-10" placeholder=" " required>
-                    <label for="confirm-password" class="input-label">Confirm Passcode</label>
+                    <label for="confirm-password" class="input-label">Confirm Password</label>
                     <button type="button" class="absolute right-3 top-3 text-gray-500 hover:text-white transition-colors focus:outline-none z-10" onclick="togglePassword('confirm-password', this)">
                         <svg class="w-5 h-5 eye-open" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                         <svg class="w-5 h-5 eye-closed hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>
@@ -140,15 +140,15 @@
                 <!-- OTP Field -->
                 <div id="group-otp" class="input-group mb-6 hidden">
                     <input type="text" id="otp" class="auth-input text-center text-xl font-bold tracking-[0.5em]" placeholder=" " maxlength="6">
-                    <label for="otp" class="input-label text-center w-full">SPIRIT CODE (OTP)</label>
+                    <label for="otp" class="input-label text-center w-full">OTP</label>
                     <p id="err-otp" class="text-red-500 text-xs mt-1 hidden font-mono tracking-wider text-center"></p>
-                    <p class="text-xs text-center theme-text-secondary mt-2">Code sent to spiritual frequency.</p>
+                    <p class="text-xs text-center theme-text-secondary mt-2">Code sent to Email.</p>
                 </div>
 
                 <!-- Remember Me -->
                 <div id="group-remember" class="flex items-center mb-6">
                     <input type="checkbox" id="remember-me" class="w-4 h-4 cursor-pointer" style="accent-color: var(--accent-primary);">
-                    <label for="remember-me" class="ml-2 text-xs theme-text-secondary tracking-widest uppercase cursor-pointer hover:opacity-80 transition-opacity">Remember Spirit Signal</label>
+                    <label for="remember-me" class="ml-2 text-xs theme-text-secondary tracking-widest uppercase cursor-pointer hover:opacity-80 transition-opacity">Remember Me</label>
                 </div>
 
                 <button id="submit-button-1" type="submit" class="w-full theme-btn-primary py-3 font-bold tracking-widest clip-cut-corner transition-transform active:scale-95">
@@ -156,25 +156,25 @@
                 </button>
             </form>
             
-            <p class="text-xs text-center mt-4 text-gray-500">By accessing the Soul Society network, you agree to the Squad 1 Terms of Service.</p>
+            <p class="text-xs text-center mt-4 text-gray-500">By accessing the Shingaku Portal, you agree Terms of Service And Conditions.</p>
         </div>
     </div>
 
     <!-- Hero Section -->
     <section id="academy" class="relative min-h-screen flex items-center justify-center overflow-hidden z-10 pt-20">
         <div class="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0">
-            <h1 class="text-[15vw] md:text-[18vw] leading-none font-bold text-outline opacity-20 whitespace-nowrap reveal-hidden absolute">BANKAI</h1>
+            <h1 class="text-[15vw] md:text-[18vw] leading-none font-bold text-outline opacity-20 whitespace-nowrap reveal-hidden absolute">NIRUSAKI</h1>
             <h1 class="text-[25vw] font-jp font-black text-outline opacity-10 whitespace-nowrap reveal-hidden absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none" style="writing-mode: horizontal-tb;">卍解</h1>
         </div>
-        <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 z-10 w-full max-w-sm md:max-w-2xl h-[50vh] md:h-[80vh] bg-contain bg-bottom bg-no-repeat opacity-80 pointer-events-none hero-mask reveal-hidden delay-100" style="background-image: url('https://upload.wikimedia.org/wikipedia/en/7/72/Ichigo_Kurosaki_character_design.jpg'); filter: grayscale(100%) contrast(120%); mix-blend-mode: luminosity;"></div>
+        <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 z-10 w-full max-w-sm md:max-w-2xl h-[50vh] md:h-[80vh] bg-contain bg-bottom bg-no-repeat opacity-80 pointer-events-none hero-mask reveal-hidden delay-100"></div>
         <div class="relative z-20 text-center px-4 max-w-5xl mx-auto mt-10 md:mt-20">
             <div class="inline-flex items-center gap-2 px-4 py-2 border border-white/10 bg-white/5 rounded-full mb-6 backdrop-blur-md reveal-hidden delay-100 theme-border">
                 <span class="w-2 h-2 rounded-full theme-bg-primary animate-pulse" style="background-color: var(--accent-primary)"></span>
                 <span class="text-xs font-bold tracking-[0.2em] theme-accent-primary">WELCOME TO SHINGAKU</span>
             </div>
             <h1 class="text-5xl md:text-8xl font-bold mb-2 theme-text-primary tracking-tighter mix-blend-difference reveal-hidden delay-200" style="text-shadow: 0 10px 30px rgba(0,0,0,0.5);">MASTER THE <br/><span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 via-yellow-500 to-orange-500">ACADEMIC ARTS</span></h1>
-            <p class="font-jp text-lg md:text-2xl text-white/80 mb-8 font-light tracking-widest reveal-hidden delay-200">霊圧を再定義せよ</p>
-            <p class="theme-text-secondary text-base md:text-xl mb-12 max-w-lg mx-auto leading-relaxed reveal-hidden delay-300">AI Tutors, Squad Wars, and Digital Archives.<br/>Forged by Nirusaki & Shubhfront.</p>
+            <p class="font-jp text-lg md:text-2xl text-white/80 mb-8 font-light tracking-widest reveal-hidden delay-200">WITH GRACE</p>
+            <p class="theme-text-secondary text-base md:text-xl mb-12 max-w-lg mx-auto leading-relaxed reveal-hidden delay-300">A.I, CBT Modes, Clans and More...<br/>Forged In Fire by Nirusaki & Shubhfront.</p>
             <div class="flex flex-col md:flex-row justify-center gap-6 items-center reveal-hidden delay-400">
                 <button id="hero-cta-btn" onclick="openAuthModal('signup')" class="clip-cut-corner theme-btn-primary pl-8 pr-6 py-4 font-bold text-lg transition-all duration-300 flex items-center gap-4 group">
                     <span id="hero-cta-text" class="flex flex-col items-start leading-none"><span>START TRAINING</span></span>
@@ -192,76 +192,76 @@
             <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-8 reveal-hidden">
                 <div>
                     <h2 class="text-4xl md:text-7xl font-bold theme-text-primary mb-2 uppercase">Core <span class="text-outline-accent">Features</span></h2>
-                    <p class="theme-text-secondary max-w-md">Upgrade your spiritual pressure with advanced tools.</p>
+                    <p class="theme-text-secondary max-w-md">Enhance Your Knowledge With Advanced Tools.</p>
                 </div>
             </div>
             <div class="bento-grid">
                 <!-- 1. Gikon AI -->
                 <div class="bento-item md:col-span-2 md:row-span-2 clip-cut-corner group p-8 flex flex-col justify-between">
                     <!-- Background GIF: Matrix Rain / Code -->
-                    <div class="absolute inset-0 bg-[url('https://media.giphy.com/media/L1R1TVTh2uul6/giphy.gif')] bg-cover bg-center opacity-10 group-hover:opacity-30 transition-opacity duration-500"></div>
+                    <div class="absolute inset-0 bg-[url('https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExanJoZHR2bzBsNDFsNTcybzh3ZzFxbHQzOTYwYXU0M2Mzd3V2bGp3ayZlcD12MV9naWZzX3NlYXJjaCZjdD1n/4ilFRqgbzbx4c/giphy.webp')] bg-cover bg-center opacity-10 group-hover:opacity-30 transition-opacity duration-500"></div>
                     <div class="absolute inset-0 bg-gradient-to-b from-transparent via-black/80 to-black z-0"></div>
                     <div class="absolute top-0 right-0 p-8 opacity-20 group-hover:opacity-40 transition-opacity duration-500 z-10"><i data-lucide="bot" class="w-48 h-48 theme-accent-primary"></i></div>
                     <div class="relative z-10">
                         <div class="flex items-center gap-2 mb-4"><span class="px-3 py-1 border theme-border theme-accent-primary text-xs font-bold rounded-full inline-block">SQUAD 12</span></div>
-                        <h3 class="text-3xl md:text-4xl font-bold theme-text-primary mb-1">GIKON AI ASSISTANT</h3>
-                        <p class="theme-text-secondary max-w-sm">Your personal Zanpakuto spirit. Ask anything, anytime. Advanced academic guidance.</p>
+                        <h3 class="text-3xl md:text-4xl font-bold theme-text-primary mb-1">A.I ASSISTANT</h3>
+                        <p class="theme-text-secondary max-w-sm">Your personal Spirit. Ask anything, Anytime. Advanced Academic Guidance.</p>
                     </div>
                 </div>
                 <!-- 2. Squad Archives -->
                 <div class="bento-item md:col-span-1 md:row-span-2 clip-cut-corner p-6 flex flex-col relative group overflow-hidden reveal-hidden delay-200">
                      <!-- Background GIF: Library/Books -->
-                     <div class="absolute inset-0 bg-[url('https://media.giphy.com/media/3o7aD2saalBwwftBIY/giphy.gif')] bg-cover bg-center opacity-10 group-hover:opacity-30 transition-opacity duration-500"></div>
+                     <div class="absolute inset-0 bg-[url('https://i.giphy.com/RtLdbbSnz99YZk8mzt.webp')] bg-cover bg-center opacity-10 group-hover:opacity-30 transition-opacity duration-500"></div>
                      <div class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent z-0"></div>
                     <div class="relative z-10 mt-auto">
                         <i data-lucide="library" class="w-8 h-8 text-cyan-400 mb-4"></i>
                         <h3 class="text-2xl font-bold text-white mb-0">SQUAD ARCHIVES</h3>
-                        <p class="text-gray-300 text-sm">Access notes for every Branch. Engineering, Science, Arts - The Great Library.</p>
+                        <p class="text-gray-300 text-sm">Access notes for every Branch of Engineering - The Great Library.</p>
                     </div>
                 </div>
                 <!-- 3. Mission Log -->
                 <div class="bento-item md:col-span-1 p-6 relative group reveal-hidden delay-400">
                     <!-- Background GIF: Checklist/Writing -->
-                    <div class="absolute inset-0 bg-[url('https://media.giphy.com/media/l0HlO4qLgJ5y5Y5O0/giphy.gif')] bg-cover bg-center opacity-10 group-hover:opacity-30 transition-opacity duration-500"></div>
+                    <div class="absolute inset-0 bg-[url('https://i.giphy.com/rp12YrwLz2cqYTPwsX.webp')] bg-cover bg-center opacity-10 group-hover:opacity-30 transition-opacity duration-500"></div>
                     <div class="absolute inset-0 bg-black/80 z-0"></div>
-                    <div class="relative z-10"><i data-lucide="clipboard-list" class="w-8 h-8 text-purple-500 mb-4"></i><h3 class="text-xl font-bold theme-text-primary">MISSION LOG</h3><p class="theme-text-secondary text-sm">Strategic To-Do Lists & Notes.</p></div>
+                    <div class="relative z-10"><i data-lucide="clipboard-list" class="w-8 h-8 text-purple-500 mb-4"></i><h3 class="text-xl font-bold theme-text-primary">TO DO LIST</h3><p class="theme-text-secondary text-sm">Strategic To-Do Lists & Notes.</p></div>
                 </div>
                 <!-- 4. Ancient Scrolls -->
                 <div class="bento-item md:col-span-1 p-6 relative group reveal-hidden delay-400">
                     <!-- Background GIF: Old Scrolls/Paper -->
-                    <div class="absolute inset-0 bg-[url('https://media.giphy.com/media/3o7aD2saalBwwftBIY/giphy.gif')] bg-cover bg-center opacity-10 group-hover:opacity-30 transition-opacity duration-500"></div>
+                    <div class="absolute inset-0 bg-[url('https://i.giphy.com/tptFQ8QAJYYvu.webp')] bg-cover bg-center opacity-10 group-hover:opacity-30 transition-opacity duration-500"></div>
                     <div class="absolute inset-0 bg-black/80 z-0"></div>
-                    <div class="relative z-10"><i data-lucide="scroll" class="w-8 h-8 text-yellow-500 mb-4"></i><h3 class="text-xl font-bold theme-text-primary">ANCIENT SCROLLS</h3><p class="theme-text-secondary text-sm">Previous Year Papers & Battles.</p></div>
+                    <div class="relative z-10"><i data-lucide="scroll" class="w-8 h-8 text-yellow-500 mb-4"></i><h3 class="text-xl font-bold theme-text-primary">PYQ'S</h3><p class="theme-text-secondary text-sm">Previous Year Papers & Assignments.</p></div>
                 </div>
                 <!-- 5. Senkaimon Digitizer -->
                 <div class="bento-item md:col-span-2 p-8 flex items-center justify-between group overflow-hidden reveal-hidden delay-200">
                     <!-- Background GIF: Portal/Scanning -->
-                    <div class="absolute inset-0 bg-[url('https://media.giphy.com/media/A06UFEx8jxEwU/giphy.gif')] bg-cover bg-center opacity-10 group-hover:opacity-30 transition-opacity duration-500"></div>
+                    <div class="absolute inset-0 bg-[url('')] bg-cover bg-center opacity-10 group-hover:opacity-30 transition-opacity duration-500"></div>
                     <div class="absolute inset-0 bg-black/90 z-0"></div>
-                    <div class="relative z-10"><h3 class="text-2xl font-bold theme-text-primary mb-1">SENKAIMON DIGITIZER</h3><p class="theme-text-secondary text-sm">Transmute physical paper into Digital CBT Exams.</p><button class="mt-6 text-xs font-bold border-b theme-border pb-1 hover:text-orange-500 transition-colors">OPEN GATE</button></div>
+                    <div class="relative z-10"><h3 class="text-2xl font-bold theme-text-primary mb-1">DIGITIZER</h3><p class="theme-text-secondary text-sm">Transmute Physical Paper Into Digital CBT Exams.</p><button class="mt-6 text-xs font-bold border-b theme-border pb-1 hover:text-orange-500 transition-colors">OPEN GATE</button></div>
                     <div class="relative z-10"><i data-lucide="scan-line" class="w-10 h-10 theme-text-secondary"></i></div>
                 </div>
                 <!-- 6. Faction Wars (Small) -->
                 <div class="bento-item md:col-span-1 p-6 relative group reveal-hidden delay-400">
                     <!-- Background GIF: Map/Strategy -->
-                    <div class="absolute inset-0 bg-[url('https://media.giphy.com/media/l41lFw057lAJcYt0Y/giphy.gif')] bg-cover bg-center opacity-10 group-hover:opacity-30 transition-opacity duration-500"></div>
+                    <div class="absolute inset-0 bg-[url('https://i.giphy.com/tptFQ8QAJYYvu.webp')] bg-cover bg-center opacity-10 group-hover:opacity-30 transition-opacity duration-500"></div>
                     <div class="absolute inset-0 bg-black/80 z-0"></div>
                     <div class="relative z-10">
                         <i data-lucide="users" class="w-8 h-8 text-red-500 mb-4"></i>
-                        <h3 class="text-xl font-bold theme-text-primary">FACTION WARS</h3>
-                        <p class="theme-text-secondary text-sm">Community Bases & Squad Battles.</p>
+                        <h3 class="text-xl font-bold theme-text-primary">CLASH OF CLANS</h3>
+                        <p class="theme-text-secondary text-sm">Bringing Back Global and Clan System With Voice Chats.</p>
                     </div>
                 </div>
 
                 <!-- 7. Tenteikura (Small) -->
                 <div class="bento-item md:col-span-1 p-6 relative group reveal-hidden delay-400">
                     <!-- Background GIF: Signal/Radar -->
-                    <div class="absolute inset-0 bg-[url('https://media.giphy.com/media/3o7aD2saalBwwftBIY/giphy.gif')] bg-cover bg-center opacity-10 group-hover:opacity-30 transition-opacity duration-500"></div>
+                    <div class="absolute inset-0 bg-[url('https://i.giphy.com/5lAtcHWPAYFdS.webp')] bg-cover bg-center opacity-10 group-hover:opacity-30 transition-opacity duration-500"></div>
                     <div class="absolute inset-0 bg-black/80 z-0"></div>
                     <div class="relative z-10">
                         <i data-lucide="bell" class="w-8 h-8 text-green-500 mb-4"></i>
-                        <h3 class="text-xl font-bold theme-text-primary">TENTEIKURA</h3>
-                        <p class="theme-text-secondary text-sm">Wake your friends with a spiritual pulse.</p>
+                        <h3 class="text-xl font-bold theme-text-primary">FUN ELEMENT</h3>
+                        <p class="theme-text-secondary text-sm">Wake your friends And Make Them Grind.</p>
                     </div>
                 </div>
             </div>
@@ -273,19 +273,19 @@
         <div class="max-w-[1400px] mx-auto px-4 flex flex-col md:flex-row gap-16">
             <div class="md:w-1/3 sticky top-32 h-fit reveal-hidden">
                 <span class="theme-accent-primary font-mono text-xs tracking-widest mb-4 block">/// CREATORS</span>
-                <h2 class="text-5xl md:text-8xl font-bold theme-text-primary leading-[0.9] mb-4">THE <br/> ARCHITECTS <br/> <span class="text-outline">00</span></h2>
-                <h3 class="text-4xl font-jp font-bold theme-text-secondary opacity-30 mb-8">創設者</h3>
-                <p class="theme-text-secondary mb-8">The minds behind Shingaku Academy.</p>
+                <h2 class="text-5xl md:text-8xl font-bold theme-text-primary leading-[0.9] mb-4">THE <br/> COOKS <br/> <span class="text-outline">00</span></h2>
+                <h3 class="text-4xl font-jp font-bold theme-text-secondary opacity-30 mb-8">RESPECT THE COOKS</h3>
+                <p class="theme-text-secondary mb-8">The Minds Behind Shingaku.</p>
             </div>
             <div class="md:w-2/3 space-y-4">
                 <div class="group relative theme-bg-card border-b theme-border p-8 transition-colors cursor-pointer reveal-hidden delay-100" onclick="window.open('https://github.com/nirusaki-malaal', '_blank')">
                     <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-6"><span class="text-2xl font-mono theme-text-secondary group-hover:text-orange-500 transition-colors">01</span><div><h3 class="text-3xl font-bold theme-text-primary">NIRUSAKI MALAAL</h3><p class="text-sm font-jp theme-text-secondary">ニルサキ</p><p class="theme-text-secondary text-sm tracking-widest uppercase mt-1">Lead Architect / Full Stack</p></div></div><i data-lucide="github" class="theme-text-secondary group-hover:text-white transition-colors"></i>
+                        <div class="flex items-center gap-6"><span class="text-2xl font-mono theme-text-secondary group-hover:text-orange-500 transition-colors">01</span><div><h3 class="text-3xl font-bold theme-text-primary">NIRUSAKI</h3><p class="text-sm font-jp theme-text-secondary">ISLAND</p><p class="theme-text-secondary text-sm tracking-widest uppercase mt-1">Lead COOK / Full Stack</p></div></div><i data-lucide="github" class="theme-text-secondary group-hover:text-white transition-colors"></i>
                     </div>
                 </div>
                 <div class="group relative theme-bg-card border-b theme-border p-8 transition-colors cursor-pointer reveal-hidden delay-200" onclick="window.open('https://github.com/shubhfront', '_blank')">
                     <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-6"><span class="text-2xl font-mono theme-text-secondary group-hover:text-cyan-400 transition-colors">02</span><div><h3 class="text-3xl font-bold theme-text-primary">SHUBHFRONT</h3><p class="text-sm font-jp theme-text-secondary">シュブフロント</p><p class="theme-text-secondary text-sm tracking-widest uppercase mt-1">Core Developer / Systems</p></div></div><i data-lucide="github" class="theme-text-secondary group-hover:text-white transition-colors"></i>
+                        <div class="flex items-center gap-6"><span class="text-2xl font-mono theme-text-secondary group-hover:text-cyan-400 transition-colors">02</span><div><h3 class="text-3xl font-bold theme-text-primary">SHUBHFRONT</h3><p class="text-sm font-jp theme-text-secondary">VIBE CODER</p><p class="theme-text-secondary text-sm tracking-widest uppercase mt-1">Frontend Developer</p></div></div><i data-lucide="github" class="theme-text-secondary group-hover:text-white transition-colors"></i>
                     </div>
                 </div>
             </div>
