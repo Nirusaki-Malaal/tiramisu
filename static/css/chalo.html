@@ -9,11 +9,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=Noto+Sans+JP:wght@400;700;900&family=Oswald:wght@300;500;700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <style>
-         :root {
-            /* Dark Mode (Default - Soul Reaper) */
+        /* CSS Variables for Theming */
+        :root {
             --bg-primary: #050505;
             --bg-secondary: #0a0a0a;
-            --bg-card: rgba(20, 20, 20, 0.9); /* Increased opacity for readability */
+            --bg-card: rgba(20, 20, 20, 0.85);
             --text-primary: #f5f5f5;
             --text-secondary: #a3a3a3;
             --accent-primary: #ff7b00; /* Orange */
@@ -22,15 +22,14 @@
             --hud-color: rgba(255, 255, 255, 0.2);
         }
 
-        /* Light Mode (Quincy / Soul Society Day) */
         .light-theme {
             --bg-primary: #e8e8e8;
             --bg-secondary: #ffffff;
-            --bg-card: rgba(255, 255, 255, 0.95);
+            --bg-card: rgba(255, 255, 255, 0.9);
             --text-primary: #1a1a1a;
             --text-secondary: #4a4a4a;
-            --accent-primary: #2563eb; /* Quincy Blue */
-            --accent-secondary: #9333ea; /* Purple */
+            --accent-primary: #2563eb;
+            --accent-secondary: #9333ea;
             --border-color: rgba(0, 0, 0, 0.1);
             --hud-color: rgba(0, 0, 0, 0.2);
         }
@@ -49,11 +48,8 @@
             text-transform: uppercase;
         }
 
-        .font-jp {
-            font-family: 'Noto Sans JP', sans-serif;
-        }
+        .font-jp { font-family: 'Noto Sans JP', sans-serif; }
 
-        /* Dynamic Classes using Variables */
         .theme-bg-primary { background-color: var(--bg-primary); }
         .theme-bg-secondary { background-color: var(--bg-secondary); }
         .theme-text-primary { color: var(--text-primary); }
@@ -70,47 +66,23 @@
             color: white;
         }
 
-        /* Outline Text Support */
-        .text-outline {
-            -webkit-text-stroke: 1px rgba(255, 255, 255, 0.3);
-            color: transparent;
-        }
-        .light-theme .text-outline {
-             -webkit-text-stroke: 1px rgba(0, 0, 0, 0.2);
-        }
-        
-        .text-outline-accent {
-            -webkit-text-stroke: 1px var(--accent-primary);
-            color: transparent;
-        }
+        .text-outline { -webkit-text-stroke: 1px rgba(255, 255, 255, 0.3); color: transparent; }
+        .light-theme .text-outline { -webkit-text-stroke: 1px rgba(0, 0, 0, 0.2); }
+        .text-outline-accent { -webkit-text-stroke: 1px var(--accent-primary); color: transparent; }
 
-        /* Cyber UI Clip Paths */
-        .clip-cut-corner {
-            clip-path: polygon(
-                20px 0, 100% 0, 
-                100% calc(100% - 20px), calc(100% - 20px) 100%, 
-                0 100%, 0 20px
-            );
-        }
-        
-        .clip-button {
-            clip-path: polygon(
-                10px 0, 100% 0, 
-                100% calc(100% - 10px), calc(100% - 10px) 100%, 
-                0 100%, 0 10px
-            );
-        }
+        .clip-cut-corner { clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px); }
+        .clip-button { clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); }
 
-        /* Bento Grid */
+        /* Responsive Bento Grid */
         .bento-grid {
             display: grid;
-            grid-template-columns: repeat(1, 1fr); /* Mobile Default */
+            grid-template-columns: repeat(1, 1fr);
             gap: 1.5rem;
         }
-        @media (min-width: 1024px) {
+        @media (min-width: 768px) {
             .bento-grid {
-                grid-template-columns: repeat(4, 1fr); /* PC Fixed */
-                grid-auto-rows: 280px;
+                grid-template-columns: repeat(12, 1fr);
+                grid-auto-rows: minmax(100px, auto);
             }
         }
 
@@ -122,206 +94,46 @@
             overflow: hidden;
             transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
         }
+        .bento-item:hover { border-color: var(--accent-primary); transform: translateY(-5px); }
 
-        .bento-item:hover {
-            border-color: var(--accent-primary);
-            transform: translateY(-5px);
-        }
+        .nav-link { position: relative; letter-spacing: 0.1em; color: var(--text-secondary); transition: color 0.3s; display: flex; flex-direction: column; align-items: center; }
+        .nav-link:hover { color: var(--text-primary); }
+        .nav-link::before { content: ''; position: absolute; bottom: -2px; left: 0; width: 0%; height: 1px; background-color: var(--accent-primary); transition: width 0.3s ease; }
+        .nav-link:hover::before { width: 100%; }
 
-        /* Navigation Link Effect */
-        .nav-link {
-            position: relative;
-            letter-spacing: 0.1em;
-            color: var(--text-secondary);
-            transition: color 0.3s;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .nav-link:hover {
-            color: var(--text-primary);
-        }
-        .nav-link::before {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            width: 0%;
-            height: 1px;
-            background-color: var(--accent-primary);
-            transition: width 0.3s ease;
-        }
-        .nav-link:hover::before {
-            width: 100%;
-        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-primary); }
+        ::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
 
-        /* Scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: var(--bg-primary);
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #444;
-            border-radius: 3px;
-        }
+        .hero-mask { mask-image: linear-gradient(to bottom, black 80%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%); }
 
-        /* Hero Image Masking */
-        .hero-mask {
-            mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
-            -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
-        }
-
-        /* Scroll Reveal Animation */
-        .reveal-hidden {
-            opacity: 0;
-            transform: translateY(40px);
-            filter: blur(4px);
-            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        
-        .reveal-visible {
-            opacity: 1;
-            transform: translateY(0);
-            filter: blur(0);
-        }
-
+        .reveal-hidden { opacity: 0; transform: translateY(40px); filter: blur(4px); transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+        .reveal-visible { opacity: 1; transform: translateY(0); filter: blur(0); }
         .delay-100 { transition-delay: 0.1s; }
         .delay-200 { transition-delay: 0.2s; }
         .delay-300 { transition-delay: 0.3s; }
         .delay-400 { transition-delay: 0.4s; }
 
-        /* Auth Modal Styles */
-        .auth-modal {
-            position: fixed;
-            inset: 0;
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(8px);
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-        }
-        .auth-modal.open {
-            opacity: 1;
-            pointer-events: auto;
-        }
-        .auth-card {
-            width: 90%;
-            max-width: 400px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--accent-primary);
-            padding: 2rem;
-            transform: scale(0.9);
-            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        }
-        .auth-modal.open .auth-card {
-            transform: scale(1);
-        }
-        .auth-input {
-            width: 100%;
-            background: var(--bg-primary);
-            border: 1px solid var(--border-color);
-            color: var(--text-primary);
-            padding: 12px;
-            margin-bottom: 16px;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-        .auth-input:focus {
-            border-color: var(--accent-primary);
-        }
+        .auth-modal { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px); opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        .auth-modal.open { opacity: 1; pointer-events: auto; }
+        .auth-card { width: 90%; max-width: 400px; background: var(--bg-secondary); border: 1px solid var(--accent-primary); padding: 2rem; transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .auth-modal.open .auth-card { transform: scale(1); }
         
-        /* Floating Labels inside Input */
+        .auth-input { width: 100%; background: var(--bg-primary); border: 1px solid var(--border-color); color: var(--text-primary); padding: 12px; margin-bottom: 16px; outline: none; transition: border-color 0.3s; }
+        .auth-input:focus { border-color: var(--accent-primary); }
+        
         .input-group { position: relative; }
-        .input-label {
-            position: absolute;
-            left: 12px;
-            top: 12px;
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            pointer-events: none;
-            transition: all 0.2s;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-        }
-        .auth-input:focus + .input-label,
-        .auth-input:not(:placeholder-shown) + .input-label {
-            top: -10px;
-            left: 0;
-            font-size: 0.7rem;
-            color: var(--accent-primary);
-            background: var(--bg-secondary);
-            padding: 0 4px;
-        }
+        .input-label { position: absolute; left: 12px; top: 12px; font-size: 0.8rem; color: var(--text-secondary); pointer-events: none; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.1em; }
+        .auth-input:focus + .input-label, .auth-input:not(:placeholder-shown) + .input-label { top: -10px; left: 0; font-size: 0.7rem; color: var(--accent-primary); background: var(--bg-secondary); padding: 0 4px; }
         
-        /* Vertical Text for Japanese decorations */
-        .writing-vertical {
-            writing-mode: vertical-rl;
-            text-orientation: upright;
-        }
-
-        /* BOOT ANIMATION (TETRIS) */
-        #boot-screen {
-            position: fixed;
-            inset: 0;
-            z-index: 9999;
-            background-color: var(--bg-primary);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            transition: opacity 0.8s ease-out;
-        }
-        .tetris-container {
-            display: grid;
-            grid-template-columns: repeat(3, 20px);
-            gap: 4px;
-            margin-bottom: 20px;
-        }
-        .tetris-cell {
-            width: 20px;
-            height: 20px;
-            background-color: var(--accent-primary);
-            opacity: 0;
-            animation: tetrisFlash 1.5s infinite;
-        }
-        .tetris-cell:nth-child(1) { animation-delay: 0.1s; }
-        .tetris-cell:nth-child(2) { animation-delay: 0.2s; }
-        .tetris-cell:nth-child(3) { animation-delay: 0.3s; }
-        .tetris-cell:nth-child(4) { animation-delay: 0.1s; } /* T-shape body */
-        .tetris-cell:nth-child(5) { animation-delay: 0.4s; visibility: hidden; } /* Gap */
-        .tetris-cell:nth-child(6) { animation-delay: 0.5s; visibility: hidden; }
-        
-        @keyframes tetrisFlash {
-            0%, 100% { opacity: 0.2; transform: scale(0.8); }
-            50% { opacity: 1; transform: scale(1.1); box-shadow: 0 0 10px var(--accent-primary); }
-        }
-
+        .writing-vertical { writing-mode: vertical-rl; text-orientation: upright; }
     </style>
 </head>
 <body class="relative selection:bg-orange-500 selection:text-black">
 
-    <!-- BOOT SCREEN -->
-    <div id="boot-screen">
-        <div class="tetris-container">
-            <div class="tetris-cell"></div>
-            <div class="tetris-cell"></div>
-            <div class="tetris-cell"></div>
-            <div class="tetris-cell"></div> <!-- Center -->
-        </div>
-        <div class="font-mono text-xs tracking-[0.3em] theme-text-secondary animate-pulse">SYSTEM INITIALIZING...</div>
-    </div>
-
-    <!-- Three.js Background Container -->
     <div id="canvas-container" class="fixed inset-0 pointer-events-none z-0 transition-opacity duration-1000"></div>
 
-    <!-- HUD Elements (Hidden on mobile) -->
+    <!-- HUD (Hidden on mobile) -->
     <div class="fixed top-0 left-0 p-4 md:p-8 pointer-events-none z-40 hidden md:block" style="border-color: var(--hud-color)">
         <div class="border-t-2 border-l-2 w-8 h-8 transition-colors duration-500" style="border-color: var(--hud-color)"></div>
         <div class="text-[10px] mt-2 font-mono tracking-widest transition-colors duration-500" style="color: var(--hud-color)">SYS.01 // ONLINE</div>
@@ -339,7 +151,7 @@
     </div>
 
     <!-- Navigation -->
-    <nav id="navbar" class="fixed w-full z-50 top-0 left-0 px-4 py-4 md:px-8 md:py-6 mix-blend-difference md:bg-transparent transition-transform duration-500">
+    <nav class="fixed w-full z-50 top-0 left-0 px-4 py-4 md:px-8 md:py-6 mix-blend-difference md:bg-transparent">
         <div class="max-w-[1400px] mx-auto flex items-center justify-between">
             <div class="flex items-center gap-2 group cursor-pointer">
                 <div class="relative w-10 h-10 bg-white/10 clip-button flex items-center justify-center group-hover:bg-orange-500 transition-colors">
@@ -353,7 +165,7 @@
             <div class="hidden md:flex items-center gap-8 text-sm font-bold tracking-[0.2em] uppercase">
                 <a href="#academy" class="nav-link group"><span>Academy</span></a>
                 <a href="#squads" class="nav-link group"><span>Features</span></a>
-                <a href="#captains" class="nav-link group"><span>Creators</span></a>
+                <a href="#captains" class="nav-link group"><span>Captains</span></a>
                 
                 <button id="theme-toggle" class="p-2 hover:bg-white/10 rounded-full transition-colors">
                     <i data-lucide="sun" class="w-5 h-5 text-white hidden" id="icon-sun"></i>
@@ -370,13 +182,12 @@
             <button id="mobile-menu-btn" class="md:hidden text-white p-2 z-50"><i data-lucide="menu" class="h-8 w-8"></i></button>
         </div>
 
-        <!-- Mobile Menu (FIXED RESPONSIVENESS AND VISIBILITY) -->
-        <div id="mobile-menu" class="fixed inset-0 z-40 hidden flex-col pt-24 px-6 gap-8 transition-transform duration-300 overflow-y-auto" style="background-color: var(--bg-secondary);">
-            <div class="absolute inset-0 bg-black/80 pointer-events-none"></div> <!-- Dark overlay for readability -->
-            <a href="#academy" class="relative z-10 text-3xl font-bold tracking-[0.2em] theme-text-primary hover:text-orange-500 transition-colors border-b theme-border pb-4">ACADEMY</a>
-            <a href="#squads" class="relative z-10 text-3xl font-bold tracking-[0.2em] theme-text-primary hover:text-orange-500 transition-colors border-b theme-border pb-4">FEATURES</a>
-            <a href="#captains" class="relative z-10 text-3xl font-bold tracking-[0.2em] theme-text-primary hover:text-orange-500 transition-colors border-b theme-border pb-4">CREATORS</a>
-            <div id="mobile-auth-section" class="relative z-10 mt-auto pb-12">
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="fixed inset-0 bg-black/95 backdrop-blur-xl z-40 hidden flex-col pt-24 px-6 gap-8 transition-transform duration-300">
+            <a href="#academy" class="text-3xl font-bold tracking-[0.2em] theme-text-primary hover:text-orange-500 transition-colors border-b theme-border pb-4">ACADEMY</a>
+            <a href="#squads" class="text-3xl font-bold tracking-[0.2em] theme-text-primary hover:text-orange-500 transition-colors border-b theme-border pb-4">FEATURES</a>
+            <a href="#captains" class="text-3xl font-bold tracking-[0.2em] theme-text-primary hover:text-orange-500 transition-colors border-b theme-border pb-4">CAPTAINS</a>
+            <div id="mobile-auth-section" class="mt-auto pb-12">
                 <button onclick="openAuthModal('signup'); document.getElementById('mobile-menu').classList.add('hidden');" class="w-full clip-button bg-white text-black py-4 font-bold hover:bg-orange-500 hover:text-white transition-all tracking-widest text-lg">ENROLL NOW</button>
             </div>
         </div>
@@ -395,6 +206,7 @@
                 </div>
             </div>
 
+            <!-- IMPORTANT: IDs here must match your JS logic -->
             <form id="auth-form">
                 <!-- Username -->
                 <div id="field-username" class="input-group mb-4">
@@ -493,7 +305,6 @@
             <div class="bento-grid">
                 <!-- 1. Gikon AI -->
                 <div class="bento-item md:col-span-2 md:row-span-2 clip-cut-corner group p-8 flex flex-col justify-between">
-                    <!-- Background GIF: Matrix Rain / Code -->
                     <div class="absolute inset-0 bg-[url('https://media.giphy.com/media/L1R1TVTh2uul6/giphy.gif')] bg-cover bg-center opacity-10 group-hover:opacity-30 transition-opacity duration-500"></div>
                     <div class="absolute inset-0 bg-gradient-to-b from-transparent via-black/80 to-black z-0"></div>
                     <div class="absolute top-0 right-0 p-8 opacity-20 group-hover:opacity-40 transition-opacity duration-500 z-10"><i data-lucide="bot" class="w-48 h-48 theme-accent-primary"></i></div>
@@ -505,7 +316,6 @@
                 </div>
                 <!-- 2. Squad Archives -->
                 <div class="bento-item md:col-span-1 md:row-span-2 clip-cut-corner p-6 flex flex-col relative group overflow-hidden reveal-hidden delay-200">
-                     <!-- Background GIF: Library/Books -->
                      <div class="absolute inset-0 bg-[url('https://media.giphy.com/media/3o7aD2saalBwwftBIY/giphy.gif')] bg-cover bg-center opacity-10 group-hover:opacity-30 transition-opacity duration-500"></div>
                      <div class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent z-0"></div>
                     <div class="relative z-10 mt-auto">
@@ -516,48 +326,20 @@
                 </div>
                 <!-- 3. Mission Log -->
                 <div class="bento-item md:col-span-1 p-6 relative group reveal-hidden delay-400">
-                    <!-- Background GIF: Checklist/Writing -->
-                    <div class="absolute inset-0 bg-[url('https://media.giphy.com/media/l0HlO4qLgJ5y5Y5O0/giphy.gif')] bg-cover bg-center opacity-10 group-hover:opacity-30 transition-opacity duration-500"></div>
                     <div class="absolute inset-0 bg-black/80 z-0"></div>
                     <div class="relative z-10"><i data-lucide="clipboard-list" class="w-8 h-8 text-purple-500 mb-4"></i><h3 class="text-xl font-bold theme-text-primary">MISSION LOG</h3><p class="theme-text-secondary text-sm">Strategic To-Do Lists & Notes.</p></div>
                 </div>
                 <!-- 4. Ancient Scrolls -->
                 <div class="bento-item md:col-span-1 p-6 relative group reveal-hidden delay-400">
-                    <!-- Background GIF: Old Scrolls/Paper -->
-                    <div class="absolute inset-0 bg-[url('https://media.giphy.com/media/3o7aD2saalBwwftBIY/giphy.gif')] bg-cover bg-center opacity-10 group-hover:opacity-30 transition-opacity duration-500"></div>
                     <div class="absolute inset-0 bg-black/80 z-0"></div>
                     <div class="relative z-10"><i data-lucide="scroll" class="w-8 h-8 text-yellow-500 mb-4"></i><h3 class="text-xl font-bold theme-text-primary">ANCIENT SCROLLS</h3><p class="theme-text-secondary text-sm">Previous Year Papers & Battles.</p></div>
                 </div>
                 <!-- 5. Senkaimon Digitizer -->
                 <div class="bento-item md:col-span-2 p-8 flex items-center justify-between group overflow-hidden reveal-hidden delay-200">
-                    <!-- Background GIF: Portal/Scanning -->
                     <div class="absolute inset-0 bg-[url('https://media.giphy.com/media/A06UFEx8jxEwU/giphy.gif')] bg-cover bg-center opacity-10 group-hover:opacity-30 transition-opacity duration-500"></div>
                     <div class="absolute inset-0 bg-black/90 z-0"></div>
                     <div class="relative z-10"><h3 class="text-2xl font-bold theme-text-primary mb-1">SENKAIMON DIGITIZER</h3><p class="theme-text-secondary text-sm">Transmute physical paper into Digital CBT Exams.</p><button class="mt-6 text-xs font-bold border-b theme-border pb-1 hover:text-orange-500 transition-colors">OPEN GATE</button></div>
                     <div class="relative z-10"><i data-lucide="scan-line" class="w-10 h-10 theme-text-secondary"></i></div>
-                </div>
-                <!-- 6. Faction Wars (Small) -->
-                <div class="bento-item md:col-span-1 p-6 relative group reveal-hidden delay-400">
-                    <!-- Background GIF: Map/Strategy -->
-                    <div class="absolute inset-0 bg-[url('https://media.giphy.com/media/l41lFw057lAJcYt0Y/giphy.gif')] bg-cover bg-center opacity-10 group-hover:opacity-30 transition-opacity duration-500"></div>
-                    <div class="absolute inset-0 bg-black/80 z-0"></div>
-                    <div class="relative z-10">
-                        <i data-lucide="users" class="w-8 h-8 text-red-500 mb-4"></i>
-                        <h3 class="text-xl font-bold theme-text-primary">FACTION WARS</h3>
-                        <p class="theme-text-secondary text-sm">Community Bases & Squad Battles.</p>
-                    </div>
-                </div>
-
-                <!-- 7. Tenteikura (Small) -->
-                <div class="bento-item md:col-span-1 p-6 relative group reveal-hidden delay-400">
-                    <!-- Background GIF: Signal/Radar -->
-                    <div class="absolute inset-0 bg-[url('https://media.giphy.com/media/3o7aD2saalBwwftBIY/giphy.gif')] bg-cover bg-center opacity-10 group-hover:opacity-30 transition-opacity duration-500"></div>
-                    <div class="absolute inset-0 bg-black/80 z-0"></div>
-                    <div class="relative z-10">
-                        <i data-lucide="bell" class="w-8 h-8 text-green-500 mb-4"></i>
-                        <h3 class="text-xl font-bold theme-text-primary">TENTEIKURA</h3>
-                        <p class="theme-text-secondary text-sm">Wake your friends with a spiritual pulse.</p>
-                    </div>
                 </div>
             </div>
         </div>
@@ -567,20 +349,20 @@
     <section id="captains" class="py-16 md:py-32 theme-bg-primary relative z-10 overflow-hidden">
         <div class="max-w-[1400px] mx-auto px-4 flex flex-col md:flex-row gap-16">
             <div class="md:w-1/3 sticky top-32 h-fit reveal-hidden">
-                <span class="theme-accent-primary font-mono text-xs tracking-widest mb-4 block">/// CREATORS</span>
-                <h2 class="text-5xl md:text-8xl font-bold theme-text-primary leading-[0.9] mb-4">THE <br/> ARCHITECTS <br/> <span class="text-outline">00</span></h2>
-                <h3 class="text-4xl font-jp font-bold theme-text-secondary opacity-30 mb-8">創設者</h3>
-                <p class="theme-text-secondary mb-8">The minds behind Shingaku Academy.</p>
+                <span class="theme-accent-primary font-mono text-xs tracking-widest mb-4 block">/// INSTRUCTORS</span>
+                <h2 class="text-5xl md:text-8xl font-bold theme-text-primary leading-[0.9] mb-4">THE <br/> GOTEI <br/> <span class="text-outline">13</span></h2>
+                <h3 class="text-4xl font-jp font-bold theme-text-secondary opacity-30 mb-8">護廷十三隊</h3>
+                <p class="theme-text-secondary mb-8">Led by captains who have mastered their Bankai in the tech industry. Learn from the elite.</p>
             </div>
             <div class="md:w-2/3 space-y-4">
-                <div class="group relative theme-bg-card border-b theme-border p-8 transition-colors cursor-pointer reveal-hidden delay-100" onclick="window.open('https://github.com/nirusaki-malaal', '_blank')">
+                <div class="group relative theme-bg-card border-b theme-border p-8 transition-colors cursor-pointer reveal-hidden delay-100">
                     <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-6"><span class="text-2xl font-mono theme-text-secondary group-hover:text-orange-500 transition-colors">01</span><div><h3 class="text-3xl font-bold theme-text-primary">NIRUSAKI MALAAL</h3><p class="text-sm font-jp theme-text-secondary">ニルサキ</p><p class="theme-text-secondary text-sm tracking-widest uppercase mt-1">Lead Architect / Full Stack</p></div></div><i data-lucide="github" class="theme-text-secondary group-hover:text-white transition-colors"></i>
+                        <div class="flex items-center gap-6"><span class="text-2xl font-mono theme-text-secondary group-hover:text-orange-500 transition-colors">01</span><div><h3 class="text-3xl font-bold theme-text-primary">YAMAMOTO G.</h3><p class="text-sm font-jp theme-text-secondary">山本元柳斎重國</p><p class="theme-text-secondary text-sm tracking-widest uppercase mt-1">Head Captain / Systems Arch</p></div></div><i data-lucide="plus" class="theme-text-secondary group-hover:rotate-45 transition-transform duration-300"></i>
                     </div>
                 </div>
-                <div class="group relative theme-bg-card border-b theme-border p-8 transition-colors cursor-pointer reveal-hidden delay-200" onclick="window.open('https://github.com/shubhfront', '_blank')">
+                <div class="group relative theme-bg-card border-b theme-border p-8 transition-colors cursor-pointer reveal-hidden delay-200">
                     <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-6"><span class="text-2xl font-mono theme-text-secondary group-hover:text-cyan-400 transition-colors">02</span><div><h3 class="text-3xl font-bold theme-text-primary">SHUBHFRONT</h3><p class="text-sm font-jp theme-text-secondary">シュブフロント</p><p class="theme-text-secondary text-sm tracking-widest uppercase mt-1">Core Developer / Systems</p></div></div><i data-lucide="github" class="theme-text-secondary group-hover:text-white transition-colors"></i>
+                        <div class="flex items-center gap-6"><span class="text-2xl font-mono theme-text-secondary group-hover:text-cyan-400 transition-colors">12</span><div><h3 class="text-3xl font-bold theme-text-primary">MAYURI K.</h3><p class="text-sm font-jp theme-text-secondary">涅マユリ</p><p class="theme-text-secondary text-sm tracking-widest uppercase mt-1">R&D / AI Research</p></div></div><i data-lucide="plus" class="theme-text-secondary group-hover:rotate-45 transition-transform duration-300"></i>
                     </div>
                 </div>
             </div>
@@ -588,32 +370,19 @@
     </section>
 
     <!-- Footer -->
-    <section id="join" class="relative min-h-screen theme-bg-secondary overflow-hidden z-10 flex items-center justify-center">
-        <!-- Background Video Placeholder -->
-        <div class="absolute inset-0 z-0">
-             <!-- Replace with your actual video source -->
-             <!-- <video autoplay muted loop playsinline class="w-full h-full object-cover opacity-30">
-                 <source src="yourname.mp4" type="video/mp4">
-             </video> -->
-             <!-- Fallback GIF -->
-             <div class="absolute inset-0 bg-[url('https://media.giphy.com/media/10Ug6rDDuG3AoU/giphy.gif')] bg-cover bg-center opacity-30"></div>
-             <div class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent"></div>
-        </div>
-
+    <section id="join" class="relative py-16 md:py-32 theme-bg-secondary overflow-hidden z-10">
+        <div class="absolute inset-0 bg-[url('https://media.giphy.com/media/10Ug6rDDuG3AoU/giphy.gif')] bg-cover bg-center opacity-20 pointer-events-none"></div>
+        <div class="absolute inset-0 bg-black/80 z-0"></div>
+        <div class="absolute left-1/2 top-0 bottom-0 w-px theme-border hidden md:block relative z-10"></div>
         <div class="max-w-4xl mx-auto px-4 text-center relative z-10 reveal-hidden">
             <h2 class="text-[10vw] font-bold theme-text-primary leading-none opacity-10 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap pointer-events-none">SOUL SOCIETY</h2>
-            <h2 class="text-[15vw] font-jp font-black theme-text-primary leading-none opacity-5 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap pointer-events-none select-none">
-                尸魂界
-            </h2>
-            
             <h2 class="text-4xl md:text-6xl font-bold theme-text-primary mb-4">READY TO AWAKEN?</h2>
-            <p class="text-2xl font-jp font-bold theme-text-secondary mb-8">覚醒せよ</p>
             <p class="theme-text-secondary mb-10 max-w-xl mx-auto">Join others in the Metagame Layer.</p>
             <button onclick="openAuthModal('signup')" class="theme-btn-primary p-4 px-8 font-bold tracking-[0.2em] clip-cut-corner transition-all flex flex-col items-center mx-auto"><span>INITIATE</span></button>
             <div class="mt-20 flex justify-center gap-8 theme-text-secondary text-sm font-mono uppercase tracking-widest">
                 <a href="#" class="hover:text-white transition-colors">Twitter</a><a href="#" class="hover:text-white transition-colors">Discord</a>
             </div>
-            <p class="mt-8 theme-text-secondary text-xs">© 2026 SHINGAKU. FORGED BY <a href="https://github.com/Nirusaki-Malaal" target="_blank" class="hover:text-orange-500 transition-colors">NIRUSAKI</a> & <a href="https://github.com/shubhfront" target="_blank" class="hover:text-orange-500 transition-colors">SHUBHFRONT</a>.</p>
+            <p class="mt-8 theme-text-secondary text-xs">© 2026 SHINGAKU. FORGED BY NIRUSAKI & SHUBHFRONT.</p>
         </div>
     </section>
 
@@ -669,21 +438,12 @@
         const authSection = document.getElementById('auth-section');
         let currentAuthMode = 'signup';
 
-        // BOOTING ANIMATION
         window.addEventListener('load', () => {
             initThreeJS();
-            // Hide boot screen after simulated loading
-            setTimeout(() => {
-                const bootScreen = document.getElementById('boot-screen');
-                bootScreen.style.opacity = '0';
-                setTimeout(() => bootScreen.style.display = 'none', 800);
-            }, 2500);
-
             getUserStatus().then(() => {
                 ifLoggedIn();
             });
         });
-
         function openAuthModal(mode) {
             ['username', 'email', 'password'].forEach(id => document.getElementById(`err-${id}`).classList.add('hidden'));
             authModal.classList.add('open');
@@ -788,8 +548,7 @@
             scene.add(spiritCore);
 
             // --- KANJI ---
-            // Added Om Symbol
-            const kanjiChars = ['卍', '解', '魂', '死', '神', '虚', '斬', '力', '🕉️'];
+            const kanjiChars = ['卍', '解', '魂', '死', '神', '虚', '斬', '力'];
             const kanjiObjects = []; // Store custom objects for animation logic
             
             const createKanjiTexture = (char) => {
@@ -881,14 +640,10 @@
                 // --- SCROLL ANIMATION LOGIC ---
                 
                 // 1. Rotate Spirit Core based on scroll
-                // spiritCore.rotation.x += 0.003 + (scrollPercent * 0.05); // Spins faster as you scroll
+                spiritCore.rotation.x += 0.003 + (scrollPercent * 0.05); // Spins faster as you scroll
                 spiritCore.rotation.y += 0.005;
                 // Core moves down slightly as you scroll
                 spiritCore.position.y = -scrollY * 0.02;
-                
-                // Pulse Hogyoku
-                const time = Date.now() * 0.001;
-                spiritCore.scale.setScalar(1 + Math.sin(time) * 0.05);
 
                 // 2. Animate Kanji with scroll influence
                 kanjiObjects.forEach(item => {
@@ -921,22 +676,6 @@
             });
         };
 
-        // ------------------------------------------------------------------
-        // NAVBAR SCROLL LOGIC
-        // ------------------------------------------------------------------
-        const navbar = document.getElementById('navbar');
-        const joinSection = document.getElementById('join');
-
-        window.addEventListener('scroll', () => {
-            if (!joinSection || !navbar) return;
-            const rect = joinSection.getBoundingClientRect();
-            // Hide navbar when footer enters viewport (visible at bottom)
-            if (rect.top <= window.innerHeight) {
-                navbar.classList.add('-translate-y-full');
-            } else {
-                navbar.classList.remove('-translate-y-full');
-            }
-        });
 
 
         // ------------------------------------------------------------------

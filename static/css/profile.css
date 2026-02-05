@@ -1,0 +1,183 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Teko:wght@300;400;600&family=Press+Start+2P&display=swap');
+
+        :root {
+            --void: #050505;
+            --panel-bg: rgba(15, 15, 15, 0.95);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --getsuga: #ff6b00;
+            --reishi: #00d2ff;
+            --danger: #ef4444;
+            --soul: #f5f5f5;
+        }
+
+        body {
+            background-color: var(--void);
+            background-image: radial-gradient(circle at 50% 50%, #111 0%, #000 100%);
+            color: var(--soul);
+            font-family: 'JetBrains Mono', monospace;
+            overflow: hidden;
+        }
+
+        /* --- FONTS --- */
+        .font-teko { font-family: 'Teko', sans-serif; }
+        .font-arcade { font-family: 'Press Start 2P', cursive; }
+
+        /* --- VISUAL EFFECTS --- */
+        .scanlines {
+            position: fixed; inset: 0; pointer-events: none; z-index: 0;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.015) 50%, transparent 50%);
+            background-size: 100% 3px;
+        }
+
+        /* Glassmorphism */
+        .glass-card {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+        }
+
+        /* --- SHAPES --- */
+        .clip-angle { 
+            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); 
+        }
+        @media (min-width: 768px) {
+            .clip-angle { 
+                clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px); 
+            }
+        }
+
+        .clip-btn { clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); }
+
+        /* --- FORMS --- */
+        .shingaku-input {
+            background: transparent;
+            border: 1px solid transparent;
+            color: #aaa;
+            transition: all 0.3s;
+        }
+        .shingaku-input.editable {
+            background: rgba(255, 255, 255, 0.03);
+            border-color: var(--border-color);
+            color: white;
+        }
+        .shingaku-input.editable:focus {
+            border-color: var(--reishi);
+            background: rgba(0, 210, 255, 0.05);
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.1);
+            outline: none;
+        }
+        .shingaku-input.locked {
+            color: #555;
+            cursor: not-allowed;
+        }
+        
+        /* Danger Input */
+        .shingaku-input.danger-input {
+            background: rgba(239, 68, 68, 0.05);
+            border-color: rgba(239, 68, 68, 0.2);
+            color: white;
+        }
+        .shingaku-input.danger-input:focus {
+            border-color: var(--danger);
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.2);
+        }
+
+        /* Toggle Switch */
+        .toggle-checkbox:checked { right: 0; border-color: var(--reishi); }
+        .toggle-checkbox:checked + .toggle-label { background-color: var(--reishi); }
+
+        /* --- TABS --- */
+        .tab-btn {
+            border-bottom: 2px solid transparent; 
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        @media (min-width: 768px) {
+            .tab-btn { border-bottom: none; border-left: 2px solid transparent; }
+        }
+        .tab-btn:hover { background: rgba(255,255,255,0.03); }
+        .tab-btn.active {
+            color: white;
+            background: linear-gradient(180deg, rgba(255,107,0,0.1), transparent);
+            border-bottom-color: var(--getsuga);
+        }
+        @media (min-width: 768px) {
+            .tab-btn.active {
+                background: linear-gradient(90deg, rgba(255,107,0,0.1), transparent);
+                border-left-color: var(--getsuga);
+                border-bottom-color: transparent;
+            }
+        }
+
+        /* Avatar */
+        .pixel-avatar { image-rendering: pixelated; }
+
+        /* Toast Notification */
+        #toast-container {
+            position: fixed; bottom: 20px; right: 20px; z-index: 100;
+            display: flex; flex-direction: column; gap: 10px; pointer-events: none;
+        }
+        .toast {
+            background: rgba(10, 10, 10, 0.95);
+            border: 1px solid var(--border-color);
+            padding: 16px 24px;
+            color: white;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: auto;
+            border-left: 4px solid var(--reishi);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+        }
+        .toast.show { transform: translateX(0); }
+        .toast.error { border-left-color: var(--danger); }
+        .toast.success { border-left-color: var(--reishi); }
+
+        /* Modals */
+        .modal-overlay {
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(8px);
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-content {
+            transform: scale(0.9); transition: transform 0.3s;
+        }
+        .modal-overlay.active .modal-content { transform: scale(1); }
+
+        /* --- ANIMATIONS & LOADERS --- */
+        #loading-screen {
+            position: fixed; inset: 0; z-index: 9999;
+            background: #000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: opacity 0.8s ease-out;
+        }
+        .loader-ring {
+            width: 60px; height: 60px;
+            border: 4px solid rgba(0, 210, 255, 0.2);
+            border-top: 4px solid var(--reishi);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        #transition-overlay {
+            position: fixed; inset: 0; z-index: 9998;
+            background: #000;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        #transition-overlay.active { opacity: 1; pointer-events: auto; }
+
+        /* Cropper Customization */
+        .cropper-view-box, .cropper-face {
+            border-radius: 50%;
+        }
+        .cropper-bg {
+            background: #111;
+        }

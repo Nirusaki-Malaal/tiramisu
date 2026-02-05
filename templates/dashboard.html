@@ -2,355 +2,839 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard | Shingaku Terminal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Shingaku | Command Center</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Rajdhani:wght@500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Teko:wght@300;400;600&family=Press+Start+2P&display=swap');
+
+        /* --- THEME VARIABLES --- */
         :root {
-            --accent: #ff7b00;
-            --bg-dark: #050505;
-            --card-bg: rgba(20, 20, 20, 0.7);
+            --void: #050505;
+            --panel-bg: rgba(15, 15, 15, 0.7);
+            --panel-border: rgba(255, 255, 255, 0.08);
+            --sidebar-bg: rgba(5, 5, 5, 0.6);
+            --text-main: #f5f5f5;
+            --text-muted: #a3a3a3;
+            --getsuga: #ff6b00;
+            --reishi: #00d2ff;
+            --danger: #ef4444;
+            --scanline-opacity: 0.02;
+            --widget-bg: rgba(0, 0, 0, 0.8);
         }
 
-        body { 
-            background-color: var(--bg-dark); 
-            color: #e0e0e0; 
-            font-family: 'Rajdhani', sans-serif;
-            overflow: hidden;
+        /* LIGHT MODE (Seireitei Day) */
+        body.light-mode {
+            --void: #f0f2f5;
+            --panel-bg: rgba(255, 255, 255, 0.85);
+            --panel-border: rgba(0, 0, 0, 0.08);
+            --sidebar-bg: rgba(245, 245, 245, 0.85);
+            --text-main: #1a1a1a;
+            --text-muted: #666666;
+            --scanline-opacity: 0.01;
+            --widget-bg: rgba(255, 255, 255, 0.95);
         }
 
-        .heading-font { font-family: 'JetBrains Mono', monospace; }
+        body {
+            background-color: var(--void);
+            color: var(--text-main);
+            font-family: 'JetBrains Mono', monospace;
+            overflow: hidden; 
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
 
-        /* Sidebar Transitions */
-        #sidebar { transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1); width: 16rem; }
-        .sidebar-collapsed { width: 4.5rem !important; }
-        .nav-text { transition: opacity 0.3s; white-space: nowrap; }
-        .sidebar-collapsed .nav-text { opacity: 0; pointer-events: none; }
+        /* Mobile Override */
+        @media (max-width: 768px) {
+            body { overflow: auto; }
+        }
 
-        /* Search Animation */
-        #search-container { width: 40px; transition: all 0.4s ease; border-radius: 20px; }
-        #search-container.expanded { width: 240px; background: rgba(255,255,255,0.05); }
-
-        /* Hover Effects */
-        .zoom-hover { transition: transform 0.3s ease, color 0.3s ease; }
-        .zoom-hover:hover { transform: scale(1.1); color: var(--accent); }
+        /* --- UTILS --- */
+        .font-teko { font-family: 'Teko', sans-serif; }
+        .font-arcade { font-family: 'Press Start 2P', cursive; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
         
-        /* Tooltip-like behavior for collapsed sidebar */
-        .nav-item:hover .tooltip { opacity: 1; transform: translateX(10px); }
-
-        /* Switch Styling */
-        .switch { position: relative; display: inline-block; width: 34px; height: 18px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .4s; border-radius: 34px; }
-        .slider:before { position: absolute; content: ""; height: 12px; width: 12px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: var(--accent); }
-        input:checked + .slider:before { transform: translateX(16px); }
-
-        /* Bento Grid Style */
-        .bento-card { 
-            background: var(--card-bg); 
-            border: 1px solid rgba(255, 255, 255, 0.05); 
-            backdrop-filter: blur(12px);
-            border-radius: 12px;
-            transition: all 0.3s ease;
+        /* --- VISUAL EFFECTS --- */
+        .scanlines {
+            position: fixed; inset: 0; pointer-events: none; z-index: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0) 50%, rgba(0,0,0,var(--scanline-opacity)) 50%);
+            background-size: 100% 3px;
         }
-        .bento-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 10px 30px -10px rgba(255, 123, 0, 0.2); }
 
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
+        #three-canvas {
+            position: fixed; inset: 0; z-index: -1;
+            opacity: 0.6; pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        body.light-mode #three-canvas { opacity: 0.4; filter: invert(1) hue-rotate(180deg); }
 
-        #three-canvas { position: fixed; inset: 0; z-index: -1; opacity: 0.5; }
+        /* Glassmorphism Cards */
+        .glass-card {
+            background: var(--panel-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--panel-border);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-card:hover {
+            border-color: var(--reishi);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Floating Widgets */
+        .floating-widget {
+            position: fixed;
+            background: var(--widget-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--panel-border);
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s, transform 0.3s;
+            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+            max-width: 90vw; /* Mobile safety */
+        }
+        
+        .widget-header {
+            cursor: grab;
+            user-select: none;
+        }
+        .widget-header:active { cursor: grabbing; }
+
+        .floating-widget.minimized {
+            height: 48px !important;
+            width: 200px !important;
+        }
+        
+        .floating-widget.minimized .widget-content {
+            display: none;
+        }
+
+        /* --- SHAPES --- */
+        .clip-angle { clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px); }
+        .clip-btn { clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px); }
+
+        /* --- ANIMATIONS --- */
+        .search-expand {
+            width: 0; opacity: 0; transition: all 0.3s ease;
+        }
+        .search-container.active .search-expand {
+            width: 180px; opacity: 1; padding-left: 10px;
+        }
+        
+        #sidebar { transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .sidebar-label { transition: opacity 0.2s, transform 0.2s; white-space: nowrap; }
+        #sidebar.collapsed { width: 72px; }
+        #sidebar.collapsed .sidebar-label { opacity: 0; transform: translateX(-10px); pointer-events: none; position: absolute; }
+
+        /* Widget Pulse */
+        .pomo-pulse { animation: pulse-border 2s infinite; }
+        @keyframes pulse-border {
+            0% { border-color: var(--panel-border); }
+            50% { border-color: var(--danger); box-shadow: 0 0 10px rgba(239, 68, 68, 0.3); }
+            100% { border-color: var(--panel-border); }
+        }
+
+        /* Toast */
+        #toast-container {
+            position: fixed; bottom: 20px; right: 20px; z-index: 200;
+            display: flex; flex-direction: column; gap: 10px; pointer-events: none;
+        }
+        .toast {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            padding: 12px 20px;
+            color: var(--text-main);
+            font-size: 12px;
+            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            pointer-events: auto;
+            border-left: 4px solid var(--reishi);
+            backdrop-filter: blur(10px);
+        }
+        .toast.show { transform: translateX(0); }
+
+        /* Mobile Nav */
+        .mobile-nav-item.active { color: var(--getsuga); }
+        
+        /* Dropdown Theme Fix */
+        .dropdown-menu {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            color: var(--text-main);
+        }
     </style>
 </head>
-<body class="selection:bg-orange-500">
+<body class="flex flex-col h-screen">
 
+    <div class="scanlines"></div>
     <canvas id="three-canvas"></canvas>
+    
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
 
-    <nav class="fixed w-full z-50 top-0 left-0 px-4 py-2 border-b border-white/5 bg-black/60 backdrop-blur-xl flex items-center justify-between">
-        <div class="flex items-center gap-4">
-            <button id="sidebar-toggle" class="p-2 hover:bg-white/10 rounded-lg text-orange-500 transition-all">
-                <i data-lucide="menu" class="w-6 h-6"></i>
-            </button>
+    <!-- ==================== FLOATING WIDGETS ==================== -->
+
+    <!-- Draggable Pomodoro -->
+    <div id="floating-pomo" class="floating-widget hidden w-64 h-auto top-20 right-4 md:top-24 md:right-8">
+        <div class="widget-header flex items-center justify-between p-3 bg-white/5 border-b border-[var(--panel-border)]">
             <div class="flex items-center gap-2">
-                <div class="w-8 h-8 bg-orange-500 flex items-center justify-center rounded-sm">
-                    <i data-lucide="zap" class="w-5 h-5 text-black fill-current"></i>
-                </div>
-                <span class="text-xl font-bold tracking-tighter heading-font">SHIN<span class="text-orange-500">GAKU</span></span>
+                <i data-lucide="timer" class="w-4 h-4 text-[var(--danger)]"></i>
+                <span class="font-teko uppercase text-[var(--text-main)] tracking-wide">Focus Timer</span>
             </div>
-            
-            <div id="search-container" class="flex items-center overflow-hidden border border-white/10 ml-4 group">
-                <button id="search-btn" class="p-2 text-gray-400 hover:text-orange-500 transition-all">
-                    <i data-lucide="search" class="w-5 h-5"></i>
-                </button>
-                <input type="text" placeholder="Search Archives..." class="bg-transparent outline-none text-xs w-full pr-4 text-white opacity-0 group-[.expanded]:opacity-100 transition-opacity">
+            <div class="flex items-center gap-2">
+                <!-- Minimize Button Removed -->
+                <button onclick="togglePomodoro()" class="text-[var(--text-muted)] hover:text-[var(--danger)]"><i data-lucide="x" class="w-3 h-3"></i></button>
+            </div>
+        </div>
+        <div class="widget-content p-4 text-center">
+            <div class="text-4xl font-mono font-bold text-[var(--text-main)] tracking-wider mb-4" id="widget-pomo-display">25:00</div>
+            <div class="flex gap-2">
+                <button onclick="pomoAction('start')" class="flex-1 py-1.5 bg-[var(--text-main)] text-black text-xs font-bold uppercase rounded-sm hover:bg-[var(--text-muted)] transition-colors">Start</button>
+                <button onclick="pomoAction('reset')" class="flex-1 py-1.5 border border-[var(--panel-border)] text-[var(--text-main)] text-xs font-bold uppercase rounded-sm hover:bg-white/5 transition-colors">Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Draggable AI Chat -->
+    <div id="floating-ai" class="floating-widget hidden w-80 h-96 bottom-20 right-4 md:bottom-8 md:right-8">
+        <div class="widget-header flex items-center justify-between p-3 bg-white/5 border-b border-[var(--panel-border)]">
+            <div class="flex items-center gap-2">
+                <i data-lucide="bot" class="w-4 h-4 text-[var(--reishi)]"></i>
+                <span class="font-teko uppercase text-[var(--text-main)] tracking-wide">Kon AI</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <!-- Minimize Button Removed -->
+                <button onclick="toggleAI()" class="text-[var(--text-muted)] hover:text-[var(--reishi)]"><i data-lucide="x" class="w-3 h-3"></i></button>
+            </div>
+        </div>
+        <div class="widget-content flex-1 flex flex-col overflow-hidden">
+            <div id="widget-ai-body" class="flex-1 overflow-y-auto p-3 space-y-3 scrollbar-hide text-xs">
+                <div class="flex gap-2">
+                    <div class="w-5 h-5 rounded-full bg-yellow-500 shrink-0 border border-black flex items-center justify-center text-[8px] font-bold text-black">K</div>
+                    <div class="bg-[var(--panel-bg)] border border-[var(--panel-border)] p-2 rounded-tr-lg rounded-bl-lg rounded-br-lg text-[var(--text-main)]">
+                        Yo! I'm Kon. What's the plan?
+                    </div>
+                </div>
+            </div>
+            <div class="p-3 border-t border-[var(--panel-border)] flex gap-2 bg-white/5">
+                <input type="text" id="widget-ai-input" placeholder="Message..." class="flex-1 bg-transparent border border-[var(--panel-border)] text-[var(--text-main)] text-xs px-2 py-1 rounded-sm focus:border-[var(--reishi)] outline-none" onkeypress="if(event.key === 'Enter') sendAIMessageWidget()">
+                <button onclick="sendAIMessageWidget()" class="p-1.5 bg-[var(--reishi)] text-black rounded-sm hover:bg-white transition-colors"><i data-lucide="send" class="w-3 h-3"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== DESKTOP TOP BAR ==================== -->
+    <nav class="hidden md:flex h-16 bg-[var(--panel-bg)] backdrop-blur-md border-b border-[var(--panel-border)] items-center justify-between px-6 z-50 shrink-0 sticky top-0 transition-colors">
+        <!-- Brand & Toggle -->
+        <div class="flex items-center gap-4">
+            <button onclick="toggleSidebar()" class="p-2 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors">
+                <i data-lucide="menu" class="w-5 h-5"></i>
+            </button>
+            <div class="flex items-center gap-3 select-none group cursor-pointer" onclick="window.location.reload()">
+                <div class="w-8 h-8 bg-white text-black flex items-center justify-center font-bold text-lg relative overflow-hidden group-hover:rotate-45 transition-transform duration-300 clip-btn">
+                    <span class="font-teko pt-1 group-hover:-rotate-45 transition-transform duration-300">S</span>
+                    <div class="absolute top-0 right-0 w-2 h-2 bg-[var(--getsuga)]"></div>
+                </div>
+                <h1 class="font-teko text-2xl font-bold tracking-wider leading-none text-[var(--text-main)]">SHINGAKU</h1>
             </div>
         </div>
 
-        <div class="flex items-center gap-6">
-            <div class="flex items-center gap-4 border-r border-white/10 pr-6">
-                <div class="relative group cursor-pointer text-gray-400 hover:text-orange-500 zoom-hover">
-                    <i data-lucide="timer" class="w-5 h-5"></i>
-                    <span class="absolute -bottom-8 left-1/2 -translate-x-1/2 text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-all uppercase tracking-widest bg-black px-2 py-1 border border-white/10">Pomodoro</span>
-                </div>
-                <div class="relative group cursor-pointer text-gray-400 hover:text-orange-500 zoom-hover">
-                    <i data-lucide="bot" class="w-5 h-5"></i>
-                    <span class="absolute -bottom-8 left-1/2 -translate-x-1/2 text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-all uppercase tracking-widest bg-black px-2 py-1 border border-white/10">AI Assistant</span>
+        <!-- Right Utilities -->
+        <div class="flex items-center gap-3">
+            <div class="search-container flex items-center bg-[var(--sidebar-bg)] border border-[var(--panel-border)] h-9 px-2 clip-btn transition-colors hover:border-[var(--reishi)]">
+                <button onclick="toggleSearch()" class="text-[var(--text-muted)] hover:text-[var(--text-main)]">
+                    <i data-lucide="search" class="w-4 h-4"></i>
+                </button>
+                <input type="text" id="global-search" placeholder="Search archives..." class="search-expand bg-transparent border-none outline-none text-xs text-[var(--text-main)] font-mono placeholder-[var(--text-muted)]" onkeyup="debouncedSearch(this.value)">
+            </div>
+
+            <div class="flex items-center gap-2">
+                <!-- Toggle Buttons for Widgets -->
+                <button onclick="togglePomodoro()" id="pomo-trigger" class="w-9 h-9 flex items-center justify-center border border-[var(--panel-border)] bg-[var(--sidebar-bg)] clip-btn text-[var(--text-muted)] hover:text-[var(--danger)] hover:bg-[var(--danger)]/10 transition-colors" title="Toggle Focus Timer">
+                    <i data-lucide="timer" class="w-4 h-4"></i>
+                </button>
+                <button onclick="toggleAI()" class="w-9 h-9 flex items-center justify-center border border-[var(--panel-border)] bg-[var(--sidebar-bg)] clip-btn text-[var(--text-muted)] hover:text-[var(--reishi)] hover:bg-[var(--reishi)]/10 transition-colors" title="Toggle Kon AI">
+                    <i data-lucide="bot" class="w-4 h-4"></i>
+                </button>
+                
+                <!-- Notification Bell -->
+                <div class="relative">
+                    <button onclick="toggleNotifications()" class="w-9 h-9 flex items-center justify-center border border-[var(--panel-border)] bg-[var(--sidebar-bg)] clip-btn text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors relative">
+                        <i data-lucide="bell" class="w-4 h-4"></i>
+                        <span id="notif-badge" class="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-[var(--getsuga)] rounded-full animate-pulse"></span>
+                    </button>
+                    <!-- Notification Dropdown -->
+                    <div id="notif-dropdown" class="dropdown-menu hidden absolute right-0 top-full mt-4 w-72 p-0 clip-angle z-50 shadow-2xl">
+                        <div class="p-3 border-b border-[var(--panel-border)] text-xs font-bold text-[var(--text-main)] font-mono bg-white/5">SOUL PAGER ALERTS</div>
+                        <div id="notif-list" class="max-h-64 overflow-y-auto">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="relative group">
-                <button class="w-9 h-9 rounded-full border-2 border-orange-500/50 overflow-hidden hover:border-orange-500 transition-all">
-                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="profile">
+            <!-- Profile Dropdown -->
+            <div class="relative ml-2 profile-container">
+                <button onclick="toggleProfile()" class="w-9 h-9 rounded-full border border-[var(--panel-border)] hover:border-[var(--reishi)] overflow-hidden transition-colors">
+                    <img id="header-avatar" src="https://ui-avatars.com/api/?name=Ichigo+Kurosaki&background=111&color=fff&font-size=0.33" alt="Profile" class="w-full h-full object-cover">
                 </button>
-                <div class="absolute right-0 mt-2 w-56 bento-card p-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
-                    <div class="mb-4">
-                        <p class="text-xs text-gray-400 uppercase font-bold mb-1">Spirit Reaper</p>
-                        <p class="text-sm font-bold">Kurosaki_01</p>
+                <!-- Menu -->
+                <div id="profile-menu" class="dropdown-menu hidden absolute right-0 top-full mt-4 w-60 p-4 clip-angle z-50 shadow-2xl">
+                    <div class="mb-4 pb-3 border-b border-[var(--panel-border)]">
+                        <div class="text-[var(--text-main)] font-teko font-bold text-lg">ICHIGO KUROSAKI</div>
+                        <div class="text-[10px] text-[var(--text-muted)] font-mono">Substitute Soul Reaper</div>
                     </div>
-                    <div class="space-y-3 pt-3 border-t border-white/10">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs uppercase tracking-wider">Dark Mode</span>
-                            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                    <div class="space-y-2 text-sm font-mono text-[var(--text-muted)]">
+                        <div class="flex items-center justify-between cursor-pointer hover:text-[var(--text-main)]" onclick="toggleDarkMode()">
+                            <span>Dark Mode</span>
+                            <div class="w-8 h-4 bg-[var(--reishi)] rounded-full relative opacity-80" id="theme-toggle-bg">
+                                <div class="absolute right-0.5 top-0.5 w-3 h-3 bg-black rounded-full transition-transform" id="theme-toggle-dot"></div>
+                            </div>
                         </div>
-                        <a href="#" class="flex items-center gap-2 text-xs uppercase hover:text-orange-500 transition-colors">
-                            <i data-lucide="settings" class="w-4 h-4"></i> Settings
-                        </a>
-                        <a href="#" class="flex items-center gap-2 text-xs uppercase text-red-500 hover:bg-red-500/10 p-1 rounded">
-                            <i data-lucide="log-out" class="w-4 h-4"></i> Sever Connection
-                        </a>
+                        <a href="login_student.html" class="flex items-center gap-2 hover:text-[var(--text-main)] w-full py-1"><i data-lucide="user" class="w-3 h-3"></i> Profile</a>
+                        <button onclick="window.location.href='login_student.html'" class="flex items-center gap-2 hover:text-[var(--text-main)] w-full py-1"><i data-lucide="settings" class="w-3 h-3"></i> Settings</button>
+                        <button onclick="alert('Logging out...')" class="flex items-center gap-2 text-[var(--danger)] hover:text-red-400 w-full py-1"><i data-lucide="log-out" class="w-3 h-3"></i> Log Out</button>
                     </div>
                 </div>
             </div>
         </div>
     </nav>
 
-    <div class="flex h-screen pt-14">
-        <aside id="sidebar" class="flex flex-col border-r border-white/5 bg-black/40 backdrop-blur-md p-4 z-40">
-            <nav class="space-y-2 flex-1 pt-4">
-                <a href="#" class="nav-item group relative flex items-center gap-4 p-3 rounded-lg hover:bg-white/5 transition-all text-gray-400 hover:text-orange-500 zoom-hover">
-                    <i data-lucide="graduation-cap" class="w-6 h-6 shrink-0"></i>
-                    <span class="nav-text text-sm font-bold uppercase tracking-widest">Academics</span>
-                </a>
-                <a href="#" class="nav-item group relative flex items-center gap-4 p-3 rounded-lg hover:bg-white/5 transition-all text-gray-400 hover:text-orange-500 zoom-hover">
-                    <i data-lucide="library" class="w-6 h-6 shrink-0"></i>
-                    <span class="nav-text text-sm font-bold uppercase tracking-widest">Notes Archive</span>
-                </a>
-                <a href="#" class="nav-item group relative flex items-center gap-4 p-3 rounded-lg hover:bg-white/5 transition-all text-gray-400 hover:text-orange-500 zoom-hover">
-                    <i data-lucide="users" class="w-6 h-6 shrink-0"></i>
-                    <span class="nav-text text-sm font-bold uppercase tracking-widest">Community</span>
-                </a>
-                <a href="#" class="nav-item group relative flex items-center gap-4 p-3 rounded-lg hover:bg-white/5 transition-all text-gray-400 hover:text-orange-500 zoom-hover">
-                    <i data-lucide="calendar-range" class="w-6 h-6 shrink-0"></i>
-                    <span class="nav-text text-sm font-bold uppercase tracking-widest">Date Sheet</span>
-                </a>
-                <a href="#" class="nav-item group relative flex items-center gap-4 p-3 rounded-lg hover:bg-white/5 transition-all text-gray-400 hover:text-orange-500 zoom-hover">
-                    <i data-lucide="book-open" class="w-6 h-6 shrink-0"></i>
-                    <span class="nav-text text-sm font-bold uppercase tracking-widest">Syllabus</span>
-                </a>
-            </nav>
-            
-            <a href="#" class="nav-item group relative flex items-center gap-4 p-3 rounded-lg hover:bg-white/5 transition-all text-gray-400 hover:text-orange-500 zoom-hover mt-auto">
-                <i data-lucide="help-circle" class="w-6 h-6 shrink-0"></i>
-                <span class="nav-text text-sm font-bold uppercase tracking-widest">Help & Support</span>
+    <!-- ==================== MOBILE TOP BAR ==================== -->
+    <nav class="md:hidden h-14 bg-[var(--panel-bg)] backdrop-blur-md border-b border-[var(--panel-border)] flex items-center justify-between px-4 sticky top-0 z-50">
+        <div class="flex items-center gap-2" onclick="window.location.reload()">
+            <div class="w-7 h-7 bg-white text-black flex items-center justify-center font-bold relative overflow-hidden clip-btn">
+                <span class="font-teko pt-0.5">S</span>
+                <div class="absolute top-0 right-0 w-1.5 h-1.5 bg-[var(--getsuga)]"></div>
+            </div>
+            <h1 class="font-teko text-xl font-bold tracking-wide text-[var(--text-main)]">SHINGAKU</h1>
+        </div>
+        <div class="flex items-center gap-3">
+             <!-- Mobile Widget Toggles -->
+            <button onclick="toggleAI()" class="text-[var(--text-muted)] hover:text-[var(--reishi)] transition-colors p-1">
+                <i data-lucide="bot" class="w-5 h-5"></i>
+            </button>
+            <button onclick="togglePomodoro()" class="text-[var(--text-muted)] hover:text-[var(--danger)] transition-colors p-1">
+                <i data-lucide="timer" class="w-5 h-5"></i>
+            </button>
+            <button onclick="toggleDarkMode()" class="text-[var(--text-muted)] transition-colors p-1">
+                <i data-lucide="moon" class="w-5 h-5 theme-icon"></i>
+            </button>
+            <a href="login_student.html" class="w-8 h-8 rounded-full border border-[var(--panel-border)] overflow-hidden">
+                <img src="https://ui-avatars.com/api/?name=Ichigo+Kurosaki&background=111&color=fff" class="w-full h-full object-cover">
             </a>
+        </div>
+    </nav>
+
+    <!-- BODY LAYOUT -->
+    <div class="flex flex-1 overflow-hidden relative z-10">
+
+        <!-- DESKTOP SIDEBAR -->
+        <aside id="sidebar" class="hidden md:flex w-64 bg-[var(--sidebar-bg)] border-r border-[var(--panel-border)] flex-col backdrop-blur-sm transition-colors">
+            <div class="flex-1 py-6 px-3 space-y-2 overflow-y-auto scrollbar-hide">
+                <p class="px-3 text-[10px] font-mono text-[var(--text-muted)] uppercase tracking-widest mb-2 sidebar-label">Navigation</p>
+                
+                <a href="#" class="sidebar-item flex items-center h-10 px-3 text-[var(--text-main)] bg-white/10 rounded-sm clip-btn group" data-label="Dashboard">
+                    <i data-lucide="layout-grid" class="w-4 h-4 text-[var(--reishi)]"></i>
+                    <span class="sidebar-label ml-3 font-mono text-xs font-bold tracking-wide">Dashboard</span>
+                </a>
+
+                <a href="#" onclick="showFeatureToast('Academics')" class="sidebar-item flex items-center h-10 px-3 text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-white/5 rounded-sm clip-btn transition-colors group" data-label="Academics">
+                    <i data-lucide="library" class="w-4 h-4 group-hover:text-[var(--getsuga)] transition-colors"></i>
+                    <span class="sidebar-label ml-3 font-mono text-xs font-bold tracking-wide">Academics</span>
+                </a>
+
+                <a href="#" onclick="showFeatureToast('Calendar')" class="sidebar-item flex items-center h-10 px-3 text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-white/5 rounded-sm clip-btn transition-colors group" data-label="Calendar">
+                    <i data-lucide="calendar" class="w-4 h-4 group-hover:text-pink-500 transition-colors"></i>
+                    <span class="sidebar-label ml-3 font-mono text-xs font-bold tracking-wide">Calendar</span>
+                </a>
+
+                <a href="#" onclick="showFeatureToast('Notes')" class="sidebar-item flex items-center h-10 px-3 text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-white/5 rounded-sm clip-btn transition-colors group" data-label="Notes">
+                    <i data-lucide="file-text" class="w-4 h-4 group-hover:text-[var(--reishi)] transition-colors"></i>
+                    <span class="sidebar-label ml-3 font-mono text-xs font-bold tracking-wide">Notes</span>
+                </a>
+
+                <a href="#" onclick="showFeatureToast('Practice')" class="sidebar-item flex items-center h-10 px-3 text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-white/5 rounded-sm clip-btn transition-colors group" data-label="Practice">
+                    <i data-lucide="target" class="w-4 h-4 group-hover:text-yellow-500 transition-colors"></i>
+                    <span class="sidebar-label ml-3 font-mono text-xs font-bold tracking-wide">Practice</span>
+                </a>
+
+                <div class="my-4 border-t border-[var(--panel-border)] sidebar-label"></div>
+                
+                <a href="#" onclick="showFeatureToast('Community')" class="sidebar-item flex items-center h-10 px-3 text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-white/5 rounded-sm clip-btn transition-colors group" data-label="Community">
+                    <i data-lucide="users" class="w-4 h-4 group-hover:text-green-400 transition-colors"></i>
+                    <span class="sidebar-label ml-3 font-mono text-xs font-bold tracking-wide">Community</span>
+                </a>
+            </div>
         </aside>
 
-        <main class="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
+        <!-- MAIN CONTENT -->
+        <main class="flex-1 overflow-y-auto p-4 lg:p-8 pb-24 md:pb-8 scrollbar-hide">
             
-            <section>
-                <h2 class="text-xs font-bold text-orange-500 uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
-                    <span class="w-8 h-[1px] bg-orange-500"></span> Today's Focus
-                </h2>
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="bento-card p-6 lg:col-span-2 flex items-center justify-between bg-gradient-to-br from-orange-500/10 to-transparent">
+            <div class="max-w-[1920px] mx-auto space-y-6">
+                
+                <!-- MOBILE SEARCH -->
+                <div class="md:hidden relative mb-4">
+                    <input type="text" placeholder="Search..." class="w-full bg-[var(--sidebar-bg)] border border-[var(--panel-border)] text-[var(--text-main)] text-sm px-4 py-3 rounded-sm font-mono focus:border-[var(--reishi)] outline-none" oninput="debouncedSearch(this.value)">
+                    <i data-lucide="search" class="absolute right-3 top-3 w-4 h-4 text-[var(--text-muted)]"></i>
+                </div>
+
+                <!-- HERO SECTION -->
+                <div class="glass-card clip-angle p-6 md:p-8 relative overflow-hidden group">
+                    <div class="absolute -right-20 -top-20 w-64 h-64 bg-[var(--reishi)]/10 rounded-full blur-3xl"></div>
+                    <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                         <div>
-                            <h3 class="text-2xl font-bold uppercase tracking-tighter mb-1">Focus Mode</h3>
-                            <p class="text-[10px] text-gray-500 uppercase tracking-widest">Deep study session in progress</p>
-                            <div class="flex gap-4 mt-6">
-                                <button class="px-6 py-2 bg-orange-500 text-black font-bold text-xs uppercase rounded-sm hover:bg-white transition-colors">Start Session</button>
-                                <button class="px-6 py-2 border border-white/10 text-xs uppercase font-bold rounded-sm hover:bg-white/5 transition-colors">Reset</button>
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="bg-[var(--reishi)]/20 text-[var(--reishi)] text-[10px] font-arcade px-2 py-1 rounded-sm border border-[var(--reishi)]/30">ONLINE</span>
+                                <span class="text-[var(--text-muted)] font-mono text-xs">Day 42</span>
                             </div>
+                            <h2 class="text-3xl md:text-5xl font-teko font-bold text-[var(--text-main)] uppercase tracking-wide">Good Evening, <span class="text-transparent bg-clip-text bg-gradient-to-r from-[var(--getsuga)] to-yellow-500">Ichigo</span>.</h2>
                         </div>
-                        <div class="text-6xl font-bold heading-font text-orange-500 pr-8">25:00</div>
-                    </div>
-
-                    <div class="space-y-6">
-                        <div class="bento-card p-4 border-l-4 border-red-500">
-                            <h4 class="text-[10px] font-bold text-red-500 uppercase mb-2">Upcoming Deadline</h4>
-                            <p class="text-sm font-bold uppercase">Zanjutsu Quiz: Level 4</p>
-                            <p class="text-[10px] text-gray-500 mt-1">Due in: 04h 22m</p>
-                        </div>
-                        <div class="bento-card p-4">
-                            <h4 class="text-[10px] font-bold text-orange-500 uppercase mb-3 flex justify-between items-center">
-                                Calendar <i data-lucide="calendar" class="w-3 h-3"></i>
-                            </h4>
-                            <div class="grid grid-cols-7 gap-1 text-[9px] text-center font-bold">
-                                <div class="text-orange-500/50">S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div class="text-orange-500/50">S</div>
-                                <div class="p-1 opacity-20">26</div><div class="p-1 opacity-20">27</div><div class="p-1 opacity-20">28</div><div class="p-1 opacity-20">29</div><div class="p-1 opacity-20">30</div><div class="p-1 opacity-20">31</div><div class="p-1 bg-orange-500 text-black rounded-sm">1</div>
-                                <div class="p-1">2</div><div class="p-1">3</div><div class="p-1">4</div><div class="p-1">5</div><div class="p-1">6</div><div class="p-1">7</div><div class="p-1">8</div>
-                            </div>
+                        <div class="flex gap-2">
+                            <button onclick="showFeatureToast('Quick Note Created')" class="clip-btn px-4 py-2 border border-[var(--panel-border)] text-[var(--text-muted)] hover:text-[var(--text-main)] text-xs font-bold uppercase transition-colors">
+                                <i data-lucide="plus" class="inline w-3 h-3 mr-1"></i> Quick Note
+                            </button>
+                            <button onclick="showFeatureToast('Squad Chat Opened')" class="clip-btn px-4 py-2 border border-[var(--panel-border)] text-[var(--text-muted)] hover:text-[var(--text-main)] text-xs font-bold uppercase transition-colors">
+                                Squad Chat
+                            </button>
                         </div>
                     </div>
                 </div>
-            </section>
 
-            <section>
-                <h2 class="text-xs font-bold text-orange-500 uppercase tracking-[0.3em] mb-4">Daily Progress</h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="bento-card p-5">
-                        <h3 class="text-[10px] font-bold text-green-500 uppercase mb-4">Completed</h3>
-                        <ul class="text-xs space-y-3">
-                            <li class="flex items-center gap-2 opacity-60 line-through"><i data-lucide="check-circle" class="w-3 h-3"></i> Morning Meditation</li>
-                            <li class="flex items-center gap-2 opacity-60 line-through"><i data-lucide="check-circle" class="w-3 h-3"></i> Kido Notes Review</li>
-                        </ul>
-                    </div>
-                    <div class="bento-card p-5 border-t-2 border-orange-500">
-                        <h3 class="text-[10px] font-bold text-orange-500 uppercase mb-4">Ongoing</h3>
-                        <ul class="text-xs space-y-3">
-                            <li class="flex items-center gap-2"><i data-lucide="play" class="w-3 h-3 text-orange-500"></i> Soul Society History</li>
-                        </ul>
-                    </div>
-                    <div class="bento-card p-5">
-                        <h3 class="text-[10px] font-bold text-gray-500 uppercase mb-4">Upcoming Today</h3>
-                        <ul class="text-xs space-y-3">
-                            <li class="flex items-center gap-2"><i data-lucide="circle" class="w-3 h-3"></i> Peer Review: Squad 11</li>
-                        </ul>
-                    </div>
-                </div>
-            </section>
-
-            <section>
-                <h2 class="text-xs font-bold text-orange-500 uppercase tracking-[0.3em] mb-4">Academic Archives</h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="bento-card p-6 group cursor-pointer">
-                        <i data-lucide="file-text" class="w-8 h-8 text-orange-500 mb-4 group-hover:scale-110 transition-transform"></i>
-                        <h3 class="font-bold uppercase tracking-wider">Research Notes</h3>
-                        <p class="text-[10px] text-gray-500 mt-1 uppercase">124 Updated Files</p>
-                    </div>
-                    <div class="bento-card p-6 group cursor-pointer">
-                        <i data-lucide="scroll" class="w-8 h-8 text-orange-500 mb-4 group-hover:scale-110 transition-transform"></i>
-                        <h3 class="font-bold uppercase tracking-wider">Soul Syllabus</h3>
-                        <p class="text-[10px] text-gray-500 mt-1 uppercase">Semester 2 v4.2</p>
-                    </div>
-                    <div class="bento-card p-6 group cursor-pointer">
-                        <i data-lucide="monitor" class="w-8 h-8 text-orange-500 mb-4 group-hover:scale-110 transition-transform"></i>
-                        <h3 class="font-bold uppercase tracking-wider">PYQ (CBT Mode)</h3>
-                        <p class="text-[10px] text-gray-500 mt-1 uppercase">Exam Simulation Ready</p>
-                    </div>
-                </div>
-            </section>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <section>
-                    <h2 class="text-xs font-bold text-orange-500 uppercase tracking-[0.3em] mb-4">Wake a Friend</h2>
-                    <div class="bento-card p-4 space-y-4">
-                        <div class="flex items-center justify-between p-2 hover:bg-white/5 rounded transition-colors">
-                            <div class="flex items-center gap-3">
-                                <div class="relative w-10 h-10">
-                                    <img src="https://api.dicebear.com/7.x/pixel-art/svg?seed=Renji" class="rounded-full bg-blue-500/20">
-                                    <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-black rounded-full" title="Online"></div>
+                <!-- DASHBOARD GRID -->
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                    
+                    <!-- LEFT COL: Current Mission (Col 8) -->
+                    <div class="md:col-span-8 flex flex-col gap-6">
+                        <div class="glass-card clip-angle p-6 flex flex-col justify-between h-auto md:h-72 relative overflow-hidden group hover:border-[var(--getsuga)] cursor-pointer" onclick="showFeatureToast('Resuming Organic Chemistry')">
+                            <div class="absolute inset-0 bg-gradient-to-r from-black via-black/60 to-transparent z-10"></div>
+                            <img src="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=2070&auto=format&fit=crop" class="absolute inset-0 w-full h-full object-cover opacity-60 z-0">
+                            
+                            <div class="relative z-20 mb-6 md:mb-0">
+                                <div class="inline-flex items-center gap-2 px-2 py-1 bg-black/60 border border-white/10 backdrop-blur-sm rounded-sm mb-3">
+                                    <div class="w-1.5 h-1.5 bg-[var(--getsuga)] rounded-full animate-pulse"></div>
+                                    <span class="text-[10px] font-mono text-white tracking-widest uppercase">Continue Mission</span>
                                 </div>
-                                <span class="text-sm font-bold uppercase tracking-widest">Renji_A</span>
+                                <h3 class="text-2xl md:text-4xl font-teko font-bold text-white uppercase leading-none">Organic Chemistry: <br>Alcohols & Phenols</h3>
+                                <p class="text-xs text-neutral-300 font-mono mt-2">Chapter 4 • 15 mins remaining</p>
                             </div>
-                            <button class="p-2 text-gray-400 hover:text-orange-500 zoom-hover"><i data-lucide="bell" class="w-4 h-4"></i></button>
-                        </div>
-                        <div class="flex items-center justify-between p-2 hover:bg-white/5 rounded transition-colors">
-                            <div class="flex items-center gap-3">
-                                <div class="relative w-10 h-10">
-                                    <img src="https://api.dicebear.com/7.x/pixel-art/svg?seed=Rukia" class="rounded-full bg-purple-500/20">
-                                    <div class="absolute bottom-0 right-0 w-3 h-3 bg-orange-500 border-2 border-black rounded-full" title="Study Mode"></div>
-                                </div>
-                                <span class="text-sm font-bold uppercase tracking-widest">Rukia_K</span>
-                            </div>
-                            <button class="p-2 text-gray-400 hover:text-orange-500 zoom-hover"><i data-lucide="bell" class="w-4 h-4"></i></button>
-                        </div>
-                    </div>
-                </section>
 
-                <section>
-                    <h2 class="text-xs font-bold text-orange-500 uppercase tracking-[0.3em] mb-4">Community Feed</h2>
-                    <div class="bento-card p-4 space-y-4">
-                        <div class="border-b border-white/5 pb-3">
-                            <p class="text-[10px] text-orange-500 uppercase font-bold">#Theory_Channel</p>
-                            <p class="text-xs mt-1">"The resonance between Bankai and the user is actually..."</p>
-                            <span class="text-[8px] text-gray-500 uppercase">2m ago • 14 replies</span>
+                            <div class="relative z-20 flex items-center justify-between mt-auto pt-4 border-t border-white/10">
+                                <div class="flex items-center gap-2 w-full max-w-[200px]">
+                                    <div class="h-1 w-full bg-white/20 rounded-full overflow-hidden">
+                                        <div class="h-full w-3/4 bg-[var(--getsuga)]"></div>
+                                    </div>
+                                    <span class="text-[10px] text-neutral-400 font-mono">75%</span>
+                                </div>
+                                <button class="flex items-center gap-2 text-xs font-bold uppercase text-white hover:text-[var(--getsuga)] transition-colors">
+                                    Resume <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                                </button>
+                            </div>
                         </div>
-                        <div>
-                            <p class="text-[10px] text-orange-500 uppercase font-bold">#Exam_Prep</p>
-                            <p class="text-xs mt-1">"Who has the notes for Kido #90? I'm struggling with..."</p>
-                            <span class="text-[8px] text-gray-500 uppercase">15m ago • 4 replies</span>
+
+                        <!-- ARSENAL (Quick Links) -->
+                        <div class="grid grid-cols-3 gap-4">
+                            <div onclick="showFeatureToast('Opening Notes Archive')" class="glass-card p-4 clip-btn flex flex-col items-center justify-center text-center gap-2 hover:bg-[var(--border-color)] cursor-pointer transition-transform hover:-translate-y-1">
+                                <div class="w-10 h-10 rounded-full bg-[var(--reishi)]/10 flex items-center justify-center text-[var(--reishi)]"><i data-lucide="file-text" class="w-5 h-5"></i></div>
+                                <span class="text-xs font-bold text-[var(--text-main)] uppercase">Notes</span>
+                            </div>
+                            <div onclick="showFeatureToast('Accessing Practice Modules')" class="glass-card p-4 clip-btn flex flex-col items-center justify-center text-center gap-2 hover:bg-[var(--border-color)] cursor-pointer transition-transform hover:-translate-y-1">
+                                <div class="w-10 h-10 rounded-full bg-yellow-500/10 flex items-center justify-center text-yellow-500"><i data-lucide="target" class="w-5 h-5"></i></div>
+                                <span class="text-xs font-bold text-[var(--text-main)] uppercase">Practice</span>
+                            </div>
+                            <div onclick="showFeatureToast('Sending Wake Signal...')" class="glass-card p-4 clip-btn flex flex-col items-center justify-center text-center gap-2 hover:bg-[var(--border-color)] cursor-pointer transition-transform hover:-translate-y-1">
+                                <div class="w-10 h-10 rounded-full bg-pink-500/10 flex items-center justify-center text-pink-500"><i data-lucide="bell-ring" class="w-5 h-5"></i></div>
+                                <span class="text-xs font-bold text-[var(--text-main)] uppercase">Wake</span>
+                            </div>
                         </div>
                     </div>
-                </section>
+
+                    <!-- RIGHT COL: Time Table & Todos (Col 4) -->
+                    <div class="md:col-span-4 flex flex-col gap-6">
+                        <div class="glass-card p-5 clip-angle h-full">
+                            <div class="flex items-center justify-between mb-4 border-b border-[var(--panel-border)] pb-2">
+                                <h4 class="font-teko text-xl text-[var(--text-main)] uppercase">Today's Classes</h4>
+                                <i data-lucide="calendar" class="w-4 h-4 text-[var(--text-muted)]"></i>
+                            </div>
+                            
+                            <!-- Time Table populated by JS -->
+                            <div id="timetable-list" class="space-y-3"></div>
+                            
+                            <div class="mt-6 border-t border-[var(--panel-border)] pt-4">
+                                <h4 class="font-teko text-xl text-[var(--text-main)] uppercase mb-2">Todo List</h4>
+                                <ul id="todo-list" class="space-y-2"></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
 
+    <!-- MOBILE BOTTOM NAVBAR (Fixed) -->
+    <nav class="md:hidden fixed bottom-0 w-full bg-[var(--panel-bg)] backdrop-blur-xl border-t border-[var(--panel-border)] z-50 px-6 py-2 flex justify-between items-center pb-safe">
+        <a href="#" onclick="window.location.reload()" class="mobile-nav-item active flex flex-col items-center gap-1">
+            <i data-lucide="layout-grid" class="w-5 h-5"></i>
+            <span class="text-[9px] font-mono uppercase">Home</span>
+        </a>
+        <a href="#" onclick="showFeatureToast('Study Mode Active')" class="mobile-nav-item flex flex-col items-center gap-1">
+            <i data-lucide="library" class="w-5 h-5"></i>
+            <span class="text-[9px] font-mono uppercase">Study</span>
+        </a>
+        <div class="relative -top-6">
+            <button onclick="showFeatureToast('Opening Practice...')" class="w-12 h-12 bg-[var(--getsuga)] rounded-full flex items-center justify-center text-black border-4 border-[var(--void)] shadow-[0_0_15px_var(--getsuga)]">
+                <i data-lucide="target" class="w-6 h-6"></i>
+            </button>
+        </div>
+        <a href="#" onclick="showFeatureToast('Loading Calendar')" class="mobile-nav-item flex flex-col items-center gap-1">
+            <i data-lucide="calendar" class="w-5 h-5"></i>
+            <span class="text-[9px] font-mono uppercase">Calendar</span>
+        </a>
+        <a href="#" onclick="showFeatureToast('Opening Community Hub')" class="mobile-nav-item flex flex-col items-center gap-1">
+            <i data-lucide="users" class="w-5 h-5"></i>
+            <span class="text-[9px] font-mono uppercase">Community</span>
+        </a>
+    </nav>
+
+    <style> .pb-safe { padding-bottom: env(safe-area-inset-bottom); } </style>
+
     <script>
-        // Initialize Icons
         lucide.createIcons();
 
-        // Sidebar Toggle Logic
-        const sidebar = document.getElementById('sidebar');
-        const toggleBtn = document.getElementById('sidebar-toggle');
-        toggleBtn.addEventListener('click', () => {
-            sidebar.classList.toggle('sidebar-collapsed');
-        });
+        /* =========================================
+         * DATA ENGINE
+         * ========================================= */
+        const SoulSocietyOS = {
+            notifications: [
+                { title: "Mission Alert", msg: "New Hollow in Karakura.", type: "urgent" },
+                { title: "System", msg: "Spirit Pager v2.0 Live.", type: "info" }
+            ],
+            todaysClasses: [
+                { time: "09:00", subject: "Calculus II", type: "Lecture", status: "completed" },
+                { time: "11:00", subject: "Kido Theory", type: "Lab", status: "live" },
+                { time: "14:00", subject: "Physics", type: "Lecture", status: "upcoming" }
+            ],
+            todos: [
+                { id: 1, text: "Finish Calculus Ch.3", done: false },
+                { id: 2, text: "Review Kido Spells", done: true },
+                { id: 3, text: "Submit Squad Report", done: false }
+            ]
+        };
 
-        // Search Expand Logic
-        const searchContainer = document.getElementById('search-container');
-        const searchBtn = document.getElementById('search-btn');
-        searchBtn.addEventListener('click', (e) => {
-            searchContainer.classList.toggle('expanded');
-        });
-
-        // --- THREE.JS SEXY ANIMATION ---
-        const initThree = () => {
-            const scene = new THREE.Scene();
-            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('three-canvas'), alpha: true, antialias: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-
-            // Create Star/Particle Field
-            const particlesGeometry = new THREE.BufferGeometry();
-            const posArray = new Float32Array(2000 * 3);
-            for(let i=0; i < 2000 * 3; i++) {
-                posArray[i] = (Math.random() - 0.5) * 10;
-            }
-            particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        // --- RENDER ---
+        function renderDashboard() {
+            // Notifications
+            const notifList = document.getElementById('notif-list');
+            notifList.innerHTML = SoulSocietyOS.notifications.map(n => `
+                <div class="p-3 border-b border-[var(--panel-border)] hover:bg-[var(--sidebar-bg)] cursor-pointer">
+                    <div class="text-[var(--text-main)] text-xs font-bold">${n.title}</div>
+                    <div class="text-[var(--text-muted)] text-[10px] font-mono">${n.msg}</div>
+                </div>
+            `).join('');
             
-            const particlesMaterial = new THREE.PointsMaterial({ 
-                size: 0.005, 
-                color: '#ff7b00',
-                transparent: true,
-                opacity: 0.5
+            // Today's Classes (Time Table)
+            const timeTableList = document.getElementById('timetable-list');
+            timeTableList.innerHTML = SoulSocietyOS.todaysClasses.map(c => {
+                let statusColor = "bg-[var(--widget-bg)] border-[var(--panel-border)]";
+                let iconColor = "text-[var(--text-muted)]";
+                
+                if (c.status === 'live') {
+                    statusColor = "bg-[var(--reishi)]/10 border-[var(--reishi)] shadow-[0_0_10px_rgba(0,210,255,0.1)]";
+                    iconColor = "text-[var(--reishi)]";
+                } else if (c.status === 'completed') {
+                    statusColor = "bg-[var(--widget-bg)] border-[var(--panel-border)] opacity-60";
+                }
+
+                return `
+                <div class="flex items-center gap-3 p-3 rounded-sm border ${statusColor} transition-all hover:scale-[1.02]">
+                    <div class="flex flex-col items-center min-w-[3rem]">
+                        <span class="text-[var(--text-main)] font-mono font-bold text-sm">${c.time}</span>
+                        <span class="text-[8px] text-[var(--text-muted)] uppercase tracking-wide">${c.status}</span>
+                    </div>
+                    <div class="h-8 w-px bg-[var(--panel-border)]"></div>
+                    <div>
+                        <div class="text-sm font-bold text-[var(--text-main)]">${c.subject}</div>
+                        <div class="text-[10px] text-[var(--text-muted)] font-mono flex items-center gap-1">
+                            <i data-lucide="book-open" class="w-3 h-3 ${iconColor}"></i> ${c.type}
+                        </div>
+                    </div>
+                </div>
+                `;
+            }).join('');
+
+            // Render Todos
+            const todoList = document.getElementById('todo-list');
+            todoList.innerHTML = SoulSocietyOS.todos.map(t => `
+                <li class="flex items-center gap-3 text-xs text-[var(--text-muted)] font-mono group cursor-pointer p-2 hover:bg-[var(--widget-bg)] rounded-sm" onclick="toggleTodo(${t.id})">
+                    <div class="w-4 h-4 border ${t.done ? 'bg-[var(--getsuga)] border-[var(--getsuga)]' : 'border-[var(--text-muted)]'} rounded-sm flex items-center justify-center transition-colors">
+                        ${t.done ? '<i data-lucide="check" class="w-3 h-3 text-black"></i>' : ''}
+                    </div>
+                    <span class="${t.done ? 'line-through opacity-50' : 'group-hover:text-[var(--text-main)]'} transition-colors">${t.text}</span>
+                </li>
+            `).join('');
+
+            lucide.createIcons();
+        }
+        
+        function toggleTodo(id) {
+            const item = SoulSocietyOS.todos.find(t => t.id === id);
+            if (item) { item.done = !item.done; renderDashboard(); }
+        }
+
+        // --- SEARCH (DEBOUNCED) ---
+        let searchTimeout;
+        function debouncedSearch(val) {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                if(val.length > 2) showFeatureToast(`Searching: "${val}"...`);
+            }, 500);
+        }
+
+        // --- WIDGET LOGIC (DRAGGABLE) ---
+        // Setup Dragging
+        function setupDraggable(elementId) {
+            const el = document.getElementById(elementId);
+            const header = el.querySelector('.widget-header');
+            let isDragging = false, startX, startY, initialLeft, initialTop;
+
+            const onStart = (clientX, clientY) => {
+                // Lock widgets on mobile
+                if (window.innerWidth < 768) return;
+
+                isDragging = true;
+                startX = clientX;
+                startY = clientY;
+                initialLeft = el.offsetLeft;
+                initialTop = el.offsetTop;
+                el.style.cursor = 'grabbing';
+            };
+
+            const onMove = (clientX, clientY) => {
+                if (!isDragging) return;
+                const dx = clientX - startX;
+                const dy = clientY - startY;
+                el.style.left = `${initialLeft + dx}px`;
+                el.style.top = `${initialTop + dy}px`;
+                // Clear bottom/right to switch to top/left positioning
+                el.style.bottom = 'auto';
+                el.style.right = 'auto';
+            };
+
+            const onEnd = () => {
+                if (!isDragging) return; // check added to prevent cursor change if not dragging
+                isDragging = false;
+                el.style.cursor = 'default';
+            };
+
+            // Mouse Events
+            header.addEventListener('mousedown', e => onStart(e.clientX, e.clientY));
+            document.addEventListener('mousemove', e => onMove(e.clientX, e.clientY));
+            document.addEventListener('mouseup', onEnd);
+
+            // Touch Events (for Mobile Dragging)
+            header.addEventListener('touchstart', e => {
+                 // Lock on mobile: don't prevent default, don't start drag
+                if (window.innerWidth < 768) return;
+                
+                const touch = e.touches[0];
+                onStart(touch.clientX, touch.clientY);
+                e.preventDefault(); // Prevent scroll while dragging widget
+            }, {passive: false});
+            
+            document.addEventListener('touchmove', e => {
+                if (!isDragging) return;
+                const touch = e.touches[0];
+                onMove(touch.clientX, touch.clientY);
+            }, {passive: false});
+
+            document.addEventListener('touchend', onEnd);
+        }
+        
+        // Pomodoro
+        let pomoInterval;
+        let pomoTime = 25 * 60;
+        function togglePomodoro() {
+            const widget = document.getElementById('floating-pomo');
+            widget.classList.toggle('hidden');
+        }
+        function pomoAction(action) {
+            const display = document.getElementById('widget-pomo-display');
+            
+            if (action === 'start') {
+                if (pomoInterval) return;
+                pomoInterval = setInterval(() => {
+                    if (pomoTime > 0) {
+                        pomoTime--;
+                        const m = Math.floor(pomoTime / 60).toString().padStart(2, '0');
+                        const s = (pomoTime % 60).toString().padStart(2, '0');
+                        display.innerText = `${m}:${s}`;
+                    } else {
+                        clearInterval(pomoInterval);
+                        alert("Session Complete!");
+                    }
+                }, 1000);
+            } else if (action === 'reset') {
+                clearInterval(pomoInterval);
+                pomoInterval = null;
+                pomoTime = 25 * 60;
+                display.innerText = "25:00";
+            }
+        }
+
+        // AI Chat
+        function toggleAI() {
+            document.getElementById('floating-ai').classList.toggle('hidden');
+        }
+
+        function sendAIMessageWidget() {
+            const input = document.getElementById('widget-ai-input');
+            const text = input.value;
+            if (!text) return;
+            const chatBody = document.getElementById('widget-ai-body');
+            
+            chatBody.innerHTML += `<div class="text-right text-[var(--text-main)] bg-[var(--reishi)]/20 p-2 rounded mb-2 inline-block ml-auto max-w-[90%] border border-[var(--reishi)]/30">${text}</div>`;
+            input.value = '';
+            chatBody.scrollTop = chatBody.scrollHeight;
+
+            setTimeout(() => {
+                const quotes = ["Good luck!", "Focus!", "Don't give up!", "Bankai!"];
+                const reply = quotes[Math.floor(Math.random() * quotes.length)];
+                chatBody.innerHTML += `<div class="text-left text-[var(--text-main)] bg-[var(--panel-bg)] p-2 rounded mb-2 inline-block mr-auto max-w-[90%] border border-[var(--panel-border)]">${reply}</div>`;
+                chatBody.scrollTop = chatBody.scrollHeight;
+            }, 600);
+        }
+
+        // --- THEME LOGIC ---
+        function toggleDarkMode() {
+            document.body.classList.toggle('light-mode');
+            const isLight = document.body.classList.contains('light-mode');
+            localStorage.setItem('shingaku-theme', isLight ? 'light' : 'dark');
+            const dot = document.getElementById('theme-toggle-dot');
+            if(dot) dot.style.transform = isLight ? 'translateX(-100%)' : 'translateX(0)';
+        }
+        if (localStorage.getItem('shingaku-theme') === 'light') {
+            document.body.classList.add('light-mode');
+        }
+
+        // --- UI UTILS ---
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); }
+        function toggleSearch() { 
+            const c = document.querySelector('.search-container');
+            c.classList.toggle('active');
+            if(c.classList.contains('active')) document.getElementById('global-search').focus();
+        }
+        function toggleProfile() { document.getElementById('profile-menu').classList.toggle('hidden'); }
+        function toggleNotifications() { document.getElementById('notif-dropdown').classList.toggle('hidden'); }
+        
+        function showFeatureToast(msg) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = `<div class="flex items-center gap-2"><i data-lucide="zap" class="w-4 h-4 text-[var(--reishi)]"></i> <span>${msg}</span></div>`;
+            container.appendChild(toast);
+            lucide.createIcons();
+            requestAnimationFrame(() => toast.classList.add('show'));
+            setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 2000);
+        }
+
+        // Close Dropdowns
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById('profile-menu');
+            const notif = document.getElementById('notif-dropdown');
+            if (!e.target.closest('.profile-container button') && !menu.contains(e.target)) menu.classList.add('hidden');
+            if (!e.target.closest('button[onclick="toggleNotifications()"]') && !notif.contains(e.target)) notif.classList.add('hidden');
+        });
+
+        // --- THREE.JS BACKGROUND ---
+        function initThreeJS() {
+            const canvas = document.getElementById('three-canvas');
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+            camera.position.z = 20;
+            const renderer = new THREE.WebGLRenderer({canvas, alpha:true, antialias:true});
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+
+            const group = new THREE.Group();
+            scene.add(group);
+
+            // 1. Spirit Core (Icosahedron)
+            const coreGeo = new THREE.IcosahedronGeometry(8, 1);
+            const coreMat = new THREE.MeshBasicMaterial({ color: 0x00d2ff, wireframe: true, transparent: true, opacity: 0.1 });
+            const core = new THREE.Mesh(coreGeo, coreMat);
+            group.add(core);
+
+            // 2. Data Rings
+            const ringGeo = new THREE.TorusGeometry(12, 0.05, 16, 100);
+            const ringMat = new THREE.MeshBasicMaterial({ color: 0xff6b00, transparent: true, opacity: 0.3 });
+            const ring1 = new THREE.Mesh(ringGeo, ringMat);
+            const ring2 = new THREE.Mesh(ringGeo, ringMat);
+            ring1.rotation.x = Math.PI/2;
+            ring2.rotation.x = Math.PI/1.5;
+            group.add(ring1);
+            group.add(ring2);
+
+            // 3. Particles
+            const particlesGeo = new THREE.BufferGeometry();
+            const count = 800;
+            const pos = new Float32Array(count * 3);
+            for(let i=0; i<count*3; i++) pos[i] = (Math.random()-0.5)*60;
+            particlesGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+            const particlesMat = new THREE.PointsMaterial({size: 0.05, color: 0x00d2ff, transparent: true, opacity: 0.4});
+            const particles = new THREE.Points(particlesGeo, particlesMat);
+            group.add(particles);
+
+            // Mouse Parallax
+            let mouseX = 0, mouseY = 0;
+            window.addEventListener('mousemove', (e) => {
+                mouseX = (e.clientX - window.innerWidth/2) * 0.001;
+                mouseY = (e.clientY - window.innerHeight/2) * 0.001;
             });
-
-            const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
-            scene.add(particlesMesh);
-
-            camera.position.z = 3;
 
             function animate() {
                 requestAnimationFrame(animate);
-                particlesMesh.rotation.y += 0.001;
-                particlesMesh.rotation.x += 0.0005;
+                core.rotation.y += 0.002;
+                core.rotation.z += 0.001;
+                ring1.rotation.z -= 0.002;
+                ring2.rotation.z += 0.002;
+                group.rotation.x += (mouseY - group.rotation.x) * 0.05;
+                group.rotation.y += (mouseX - group.rotation.y) * 0.05;
                 renderer.render(scene, camera);
             }
             animate();
-
             window.addEventListener('resize', () => {
-                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.aspect = window.innerWidth/window.innerHeight;
                 camera.updateProjectionMatrix();
                 renderer.setSize(window.innerWidth, window.innerHeight);
             });
+        }
+
+        window.onload = () => {
+            initThreeJS();
+            renderDashboard();
+            setupDraggable('floating-pomo');
+            setupDraggable('floating-ai');
         };
 
-        initThree();
+        /*
+        --- VARIABLE DESCRIPTION TABLE ---
+        | Variable | Type | Description |
+        |---|---|---|
+        | SoulSocietyOS | Object | Mock backend containing user, notification, schedule, and class data. |
+        | pomoInterval | Interval | Stores the setInterval ID for the Pomodoro timer. |
+        | pomoTime | Number | Current remaining time in seconds for Pomodoro (default 1500). |
+        | searchTimeout | Timeout | Stores the timeout ID for search debouncing. |
+        | --panel-bg | CSS Var | Glassmorphism background color (dynamic by theme). |
+        | --reishi | CSS Var | Primary accent color (Blue). |
+        | --getsuga | CSS Var | Secondary accent color (Orange). |
+        */
+
     </script>
 </body>
 </html>
