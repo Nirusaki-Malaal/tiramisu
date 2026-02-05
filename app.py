@@ -177,9 +177,44 @@ def logout():
     if request.method == "POST":
         logout_user()
         return jsonify({"status": "success"})
-
+    
+@app.route("/profile", methods=["GET"])
+@login_required
+def profile():
+    username , email = current_user.username , current_user.email
+    name , bio = udb.get_name(username) , udb.get_bio(username)
+    roll_no = email.upper().split("@")[0]
+    return render_template("profile.html", username=username, email=email,roll_no=roll_no, name=name, bio=bio)
 def start_otp_bg():
     asyncio.run(otp_handle())
+
+@app.route("/update_profile", methods=["POST"])
+@login_required
+def update_profile():
+    data = request.get_json()
+    name = data.get("name")
+    bio = data.get("bio")
+    username = current_user.username
+    udb.update_name(username, name)
+    udb.update_bio(username, bio)
+    return jsonify({"status": "success"})
+
+
+@app.route("/update_password", methods=["POST"])
+@login_required
+def update_password():
+    data = request.get_json()
+    oldpass = data.get("oldpass")
+    newpass = data.get("newpass")
+    username = current_user.username
+    user = udb.get_user_by_username(username=username)
+    print(current_user.password)
+    if user and check_password_hash(str(current_user.password), oldpass):
+        hashed_password = generate_password_hash(newpass, method="pbkdf2:sha256")
+        udb.update_password(username, hashed_password)
+        return jsonify({"status": "success"})
+    else:
+        return jsonify({"status": "error"})
 
 Thread(target=start_otp_bg, daemon=True).start()
 app.run(debug=True)

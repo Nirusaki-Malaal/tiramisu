@@ -63,7 +63,7 @@ lucide.createIcons();
             playClickSound();
             const overlay = document.getElementById('transition-overlay');
             overlay.classList.add('active');
-            setTimeout(() => window.location.href = "dashboard.html", 500);
+            setTimeout(() => window.location.href = "dashboard", 500);
         }
 
         /* --- PHOTO & AVATAR LOGIC --- */
@@ -219,30 +219,55 @@ lucide.createIcons();
             setTimeout(() => {
                 document.getElementById('loading-screen').style.opacity = '0';
                 setTimeout(() => document.getElementById('loading-screen').style.display = 'none', 800);
-                updateAvatarLive("sr_ichigo");
+                updateAvatarLive(document.getElementById("username-input").value);
             }, 1500);
         }
 
         async function handleUpdateProfile() {
             playClickSound();
             showToast("Syncing Spirit Data...", 'normal');
-            setTimeout(() => {
-                showToast("Profile Updated. Reloading...", 'success');
-                setTimeout(() => window.location.reload(), 1500);
-            }, 1000);
+            let bio = document.getElementById('bio-input').value;
+            let name = document.getElementById('username-input').value;
+            const response = await fetch('/update_profile', {method:"POST" , headers: { "Content-Type": "application/json" },body: JSON.stringify({ bio: bio, name: name })});
+            if (response.ok) {
+                    showToast("Profile Updated. Reloading...", 'success');
+            }
+            else
+            {
+                showToast("Profile Updation Failed");
+            }
+            location.reload();
         }
 
+         function check_password(password) 
+        {
+            const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,64}$/;
+            return PASSWORD_REGEX.test(password);
+        }
         async function handleChangePassword() {
             playClickSound();
+            const oldPass = document.getElementById("old-pass").value;
             const newPass = document.getElementById('new-pass').value;
             const confirmPass = document.getElementById('confirm-pass').value;
             if (newPass !== confirmPass) {
                 showToast("Error: Spirit codes do not match.", 'error');
                 return;
             }
-            showToast("Security Clearance Updated. Reloading...", 'success');
-            setTimeout(() => window.location.reload(), 1500);
+            
+            response = await fetch("/update_password", {method:"POST", headers:{"Content-Type": "application/json"}, body: JSON.stringify({oldpass: oldPass, newpass: newPass})});
+            if (response.status === "success")
+            {
+                    showToast("Security Clearance Updated. Reloading...", 'success');
+                    
+            }
+            else 
+            {
+
+                showToast("Invalid Password", 'error');
+            }
+            
         }
+        
 
         // --- 2FA & DELETE ACCOUNT LOGIC ---
         
@@ -263,7 +288,7 @@ lucide.createIcons();
         function verifyDeletePassword() {
             const pass = document.getElementById('delete-password').value;
             if(pass.length > 0) {
-                // Dummy check success
+
                 showToast("Password Verified. Dispatching Hell Butterfly...", 'normal');
                 setTimeout(() => {
                     document.getElementById('delete-step-1').classList.add('hidden');
@@ -309,3 +334,5 @@ lucide.createIcons();
         document.addEventListener("DOMContentLoaded", async () => {
             await fetchUserProfile();
         });
+
+        

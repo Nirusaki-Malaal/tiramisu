@@ -16,3 +16,21 @@ class Users:
     
     def get_user(self, email: str):
         return self.user.find_one({"email": email})
+    
+    def get_user_by_username(self, username: str):
+        return self.user.find_one({"username": username})
+    
+    def get_name(self, username: str):
+        return self.user.find_one({"username": username}).get("name", "")
+    
+    def get_bio(self, username: str):
+        return self.user.find_one({"username": username}).get("bio", "")
+    
+    def update_name(self, username: str, name: str):
+        self.user.update_one({"username": username}, {"$set": {"name": name}})
+    
+    def update_bio(self, username: str, bio: str):
+        self.user.update_one({"username": username}, {"$set": {"bio": bio}})
+
+    def update_password(self, username: str, hashed_password: str):
+        self.user.update_one({"username": username}, {"$set": {"password": hashed_password}})

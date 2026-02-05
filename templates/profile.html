@@ -20,7 +20,7 @@
     <!-- LOADING SCREEN -->
     <div id="loading-screen">
         <div class="loader-ring mb-4"></div>
-        <div class="font-teko text-xl tracking-[0.3em] text-white animate-pulse">CONNECTING SOUL CHAIN...</div>
+        <div class="font-teko text-xl tracking-[0.3em] text-white animate-pulse">Loading Profile...</div>
     </div>
 
     <!-- TRANSITION OVERLAY -->
@@ -79,7 +79,7 @@
     <!-- CROPPER MODAL -->
     <div id="cropper-modal" class="modal-overlay fixed inset-0 z-[110] flex items-center justify-center p-4">
         <div class="modal-content glass-card w-full max-w-lg p-6 clip-angle flex flex-col h-[80vh] md:h-auto">
-            <h3 class="font-teko text-2xl text-white uppercase mb-4">Adjust Spirit Form</h3>
+            <h3 class="font-teko text-2xl text-white uppercase mb-4">Adjust/Crop Your Image</h3>
             <div class="flex-1 bg-black/50 border border-white/10 mb-4 relative overflow-hidden h-64 md:h-96">
                 <img id="cropper-image" src="" class="max-w-full">
             </div>
@@ -99,8 +99,8 @@
         <div class="modal-content glass-card w-full max-w-2xl p-8 clip-angle relative">
             <button onclick="closeModal('avatar-modal')" class="absolute top-4 right-4 text-neutral-500 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
             
-            <h3 class="font-teko text-3xl text-white uppercase mb-2">Soul Signature Selection</h3>
-            <p class="text-xs font-mono text-neutral-400 mb-6">Choose a spirit form from the archive.</p>
+            <h3 class="font-teko text-3xl text-white uppercase mb-2">Avatar Selection</h3>
+            <p class="text-xs font-mono text-neutral-400 mb-6">Choose an Avatar form from the archive.</p>
             
             <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4 mb-6 max-h-[50vh] overflow-y-auto custom-scroll" id="avatar-grid">
                 <!-- Avatars injected here -->
@@ -154,7 +154,7 @@
             <aside class="w-full md:w-72 bg-black/40 border-b md:border-b-0 md:border-r border-white/5 flex flex-row md:flex-col shrink-0">
                 <div class="p-8 hidden md:block">
                     <h2 class="font-teko text-3xl text-white uppercase tracking-wider mb-1">Account Center</h2>
-                    <p class="text-[10px] text-neutral-500 font-mono uppercase tracking-widest">Manage spiritual pressure</p>
+                    <p class="text-[10px] text-neutral-500 font-mono uppercase tracking-widest">Manage Settings</p>
                 </div>
                 
                 <nav class="flex flex-row md:flex-col p-0 md:p-0 w-full md:space-y-1 overflow-x-auto no-scrollbar">
@@ -206,8 +206,8 @@
                                 </div>
                             </div>
                             <div class="text-center md:text-left z-10">
-                                <h1 class="text-2xl md:text-4xl font-teko font-bold text-white uppercase tracking-wide mb-1" id="display-username">sr_ichigo</h1>
-                                <p class="text-[10px] md:text-xs font-mono text-neutral-400 mb-4">Substitute Soul Reaper • Squad 11</p>
+                                <h1 class="text-2xl md:text-4xl font-teko font-bold text-white uppercase tracking-wide mb-1" id="display-username">{{username}}</h1>
+                                <!-- <p class="text-[10px] md:text-xs font-mono text-neutral-400 mb-4">Substitute Soul Reaper • Squad 11</p> -->
                                 <button onclick="togglePhotoMenu(event)" class="text-[10px] md:text-xs font-bold font-mono text-black bg-[var(--reishi)] hover:bg-white transition-colors px-4 py-2 rounded-sm uppercase tracking-wider clip-btn relative shadow-[0_0_10px_rgba(0,210,255,0.2)]">
                                     Change Photo
                                 </button>
@@ -221,7 +221,7 @@
                             <div class="flex-1 space-y-2 relative">
                                 <label class="md:hidden text-[10px] font-mono text-neutral-500 uppercase font-bold">Name</label>
                                 <div class="relative">
-                                    <input type="text" id="name-input" value="Ichigo Kurosaki" readonly class="shingaku-input w-full p-3 md:p-4 rounded-sm text-sm font-bold tracking-wide">
+                                    <input type="text" id="name-input" value={{name}} readonly class="shingaku-input w-full p-3 md:p-4 rounded-sm text-sm font-bold tracking-wide">
                                     <button class="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-[var(--getsuga)] transition-colors p-1" onclick="enableEdit('name-input')">
                                         <i data-lucide="pencil" class="w-4 h-4"></i>
                                     </button>
@@ -236,10 +236,8 @@
                             <div class="flex-1 space-y-2 relative">
                                 <label class="md:hidden text-[10px] font-mono text-neutral-500 uppercase font-bold">Username</label>
                                 <div class="relative">
-                                    <input type="text" id="username-input" value="sr_ichigo" readonly class="shingaku-input w-full p-3 md:p-4 pr-10 rounded-sm text-sm font-mono text-[var(--reishi)]">
-                                    <button class="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-[var(--getsuga)] transition-colors p-1" onclick="enableEdit('username-input')">
-                                        <i data-lucide="pencil" class="w-4 h-4"></i>
-                                    </button>
+                                    <input id="username-input" type="text" value="{{username}}" disabled class="shingaku-input locked w-full p-3 md:p-4 rounded-sm text-sm bg-white/5 opacity-80">
+                                    <i data-lucide="lock" class="w-4 h-4 text-neutral-600 absolute right-4 top-1/2 -translate-y-1/2"></i>
                                 </div>
                                 <p class="text-[10px] text-neutral-600 font-mono">Avatar is generated from your username.</p>
                             </div>
@@ -251,7 +249,7 @@
                             <div class="flex-1 space-y-2 relative">
                                 <label class="md:hidden text-[10px] font-mono text-neutral-500 uppercase font-bold">Bio</label>
                                 <div class="relative">
-                                    <textarea id="bio-input" readonly class="shingaku-input w-full p-3 md:p-4 pr-10 rounded-sm text-sm h-32 resize-none leading-relaxed" maxlength="150">Substitute Soul Reaper. Protector of Karakura Town. #Squad11</textarea>
+                                    <textarea id="bio-input" readonly class="shingaku-input w-full p-3 md:p-4 pr-10 rounded-sm text-sm h-32 resize-none leading-relaxed" maxlength="150">{{bio}}</textarea>
                                     <button class="absolute right-3 top-4 text-neutral-500 hover:text-[var(--getsuga)] transition-colors p-1" onclick="enableEdit('bio-input')">
                                         <i data-lucide="pencil" class="w-4 h-4"></i>
                                     </button>
@@ -266,7 +264,7 @@
                             <div class="flex-1">
                                 <label class="md:hidden text-[10px] font-mono text-neutral-500 uppercase font-bold">Roll No.</label>
                                 <div class="relative">
-                                    <input type="text" value="15" readonly class="shingaku-input locked w-full p-3 md:p-4 rounded-sm text-sm bg-white/5 opacity-50">
+                                    <input type="text" value={{roll_no}} readonly class="shingaku-input locked w-full p-3 md:p-4 rounded-sm text-sm bg-white/5 opacity-50">
                                     <i data-lucide="lock" class="w-4 h-4 text-neutral-600 absolute right-4 top-1/2 -translate-y-1/2"></i>
                                 </div>
                             </div>
@@ -278,10 +276,10 @@
                             <div class="flex-1">
                                 <label class="md:hidden text-[10px] font-mono text-neutral-500 uppercase font-bold">Email</label>
                                 <div class="relative">
-                                    <input type="email" value="ichigo.k@soulsociety.com" readonly class="shingaku-input locked w-full p-3 md:p-4 rounded-sm text-sm bg-white/5 opacity-50 pr-10">
+                                    <input type="email" value={{email}} readonly class="shingaku-input locked w-full p-3 md:p-4 rounded-sm text-sm bg-white/5 opacity-50 pr-10">
                                     <i data-lucide="lock" class="w-4 h-4 text-neutral-600 absolute right-4 top-1/2 -translate-y-1/2"></i>
                                 </div>
-                                <p class="text-[10px] text-neutral-600 font-mono mt-1">Email changes require Head Captain authorization.</p>
+                                <p class="text-[10px] text-neutral-600 font-mono mt-1">Email changes require authorization.</p>
                             </div>
                         </div>
 
@@ -355,10 +353,10 @@
 
                     <!-- TAB: NOTIFICATIONS -->
                     <div id="tab-notifications" class="tab-content hidden space-y-6 md:space-y-8 max-w-3xl">
-                        <h3 class="font-teko text-2xl md:text-3xl text-white uppercase mb-4 md:mb-8 border-b border-white/10 pb-4">Reishukkaku Alerts</h3>
+                        <h3 class="font-teko text-2xl md:text-3xl text-white uppercase mb-4 md:mb-8 border-b border-white/10 pb-4">Alerts</h3>
                         <div class="space-y-4 md:space-y-6">
                             <div class="flex items-center justify-between p-4 border border-white/5 bg-white/[0.02] rounded-sm">
-                                <div><h4 class="text-white font-bold text-xs md:text-sm uppercase">Mission Assignments</h4><p class="text-neutral-500 text-[10px] md:text-xs font-mono">Get notified when new Hollows appear.</p></div>
+                                <div><h4 class="text-white font-bold text-xs md:text-sm uppercase">Mission Assignments</h4><p class="text-neutral-500 text-[10px] md:text-xs font-mono">Get notified when new Assignments appear.</p></div>
                                 <div class="relative inline-block w-12 mr-2 align-middle select-none"><input type="checkbox" name="toggle" id="toggle1" onclick="playClickSound()" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer border-neutral-700 checked:right-0 checked:border-[var(--reishi)] transition-all duration-300"/><label for="toggle1" class="toggle-label block overflow-hidden h-6 rounded-full bg-neutral-800 cursor-pointer"></label></div>
                             </div>
                         </div>

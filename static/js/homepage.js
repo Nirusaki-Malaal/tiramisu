@@ -1,63 +1,44 @@
-        // Initialize Lucide Icons
-        lucide.createIcons();
+ lucide.createIcons();
 
-        // ------------------------------------------------------------------
-        // THEME SWITCHER LOGIC
-        // ------------------------------------------------------------------
+        // THEME SWITCHER
         let isLightMode = false;
         const themeBtn = document.getElementById('theme-toggle');
         const sunIcon = document.getElementById('icon-sun');
         const moonIcon = document.getElementById('icon-moon');
         const body = document.body;
-
-        // Global reference to Three.js objects for theme updating
         let sceneRef, fogRef, coreMaterialRef, particlesMaterialRef, kanjiMaterialsRef = [];
 
         themeBtn.addEventListener('click', () => {
             isLightMode = !isLightMode;
             body.classList.toggle('light-theme');
-            
-            // Icon Toggle
-            if(isLightMode) {
-                sunIcon.classList.remove('hidden');
-                moonIcon.classList.add('hidden');
-            } else {
-                sunIcon.classList.add('hidden');
-                moonIcon.classList.remove('hidden');
-            }
-
-            // Update Three.js Scene Colors
+            sunIcon.classList.toggle('hidden');
+            moonIcon.classList.toggle('hidden');
             updateThreeTheme();
         });
 
         const updateThreeTheme = () => {
             if(!sceneRef) return;
-
             if(isLightMode) {
-                // Light Mode (Quincy: White/Blue)
                 fogRef.color.setHex(0xe8e8e8); 
-                coreMaterialRef.color.setHex(0x2563eb); // Blue Core
-                particlesMaterialRef.color.setHex(0x9333ea); // Purple Particles
-                // Update Kanji colors
-                kanjiMaterialsRef.forEach(mat => {
-                    mat.color.setHex(Math.random() > 0.5 ? 0x2563eb : 0x9333ea);
-                });
+                coreMaterialRef.color.setHex(0x2563eb); 
+                particlesMaterialRef.color.setHex(0x9333ea); 
+                kanjiMaterialsRef.forEach(mat => mat.color.setHex(Math.random() > 0.5 ? 0x2563eb : 0x9333ea));
             } else {
-                // Dark Mode (Soul Reaper: Black/Cyan/Orange)
                 fogRef.color.setHex(0x050505);
-                coreMaterialRef.color.setHex(0x00f2ff); // Cyan Core
+                coreMaterialRef.color.setHex(0x00f2ff); 
                 particlesMaterialRef.color.setHex(0x00f2ff);
-                // Update Kanji colors
-                kanjiMaterialsRef.forEach(mat => {
-                    mat.color.setHex(Math.random() > 0.5 ? 0xff7b00 : 0x00f2ff);
-                });
+                kanjiMaterialsRef.forEach(mat => mat.color.setHex(Math.random() > 0.5 ? 0xff7b00 : 0x00f2ff));
             }
         };
 
+        // MOBILE MENU
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
 
-        // ------------------------------------------------------------------
-        // AUTHENTICATION LOGIC
-        // ------------------------------------------------------------------
+        // ==========================================
+        // RESTORED USER JAVASCRIPT LOGIC
+        // ==========================================
         const authModal = document.getElementById('auth-modal');
         const tabLogin = document.getElementById('tab-login');
         let user_login = false;
@@ -68,12 +49,21 @@
         const authSection = document.getElementById('auth-section');
         let currentAuthMode = 'signup';
 
+        // BOOTING ANIMATION
         window.addEventListener('load', () => {
             initThreeJS();
+            // Hide boot screen after simulated loading
+            setTimeout(() => {
+                const bootScreen = document.getElementById('boot-screen');
+                bootScreen.style.opacity = '0';
+                setTimeout(() => bootScreen.style.display = 'none', 800);
+            }, 2500);
+
             getUserStatus().then(() => {
                 ifLoggedIn();
             });
         });
+
         function openAuthModal(mode) {
             ['username', 'email', 'password'].forEach(id => document.getElementById(`err-${id}`).classList.add('hidden'));
             authModal.classList.add('open');
@@ -178,7 +168,8 @@
             scene.add(spiritCore);
 
             // --- KANJI ---
-            const kanjiChars = ['卍', '解', '魂', '死', '神', '虚', '斬', '力'];
+            // Added Om Symbol
+            const kanjiChars = ['卍', '解', '魂', '死', '神', '虚', '斬', '力', '🕉️'];
             const kanjiObjects = []; // Store custom objects for animation logic
             
             const createKanjiTexture = (char) => {
@@ -270,10 +261,14 @@
                 // --- SCROLL ANIMATION LOGIC ---
                 
                 // 1. Rotate Spirit Core based on scroll
-                spiritCore.rotation.x += 0.003 + (scrollPercent * 0.05); // Spins faster as you scroll
+                // spiritCore.rotation.x += 0.003 + (scrollPercent * 0.05); // Spins faster as you scroll
                 spiritCore.rotation.y += 0.005;
                 // Core moves down slightly as you scroll
                 spiritCore.position.y = -scrollY * 0.02;
+                
+                // Pulse Hogyoku
+                const time = Date.now() * 0.001;
+                spiritCore.scale.setScalar(1 + Math.sin(time) * 0.05);
 
                 // 2. Animate Kanji with scroll influence
                 kanjiObjects.forEach(item => {
@@ -306,6 +301,22 @@
             });
         };
 
+        // ------------------------------------------------------------------
+        // NAVBAR SCROLL LOGIC
+        // ------------------------------------------------------------------
+        const navbar = document.getElementById('navbar');
+        const joinSection = document.getElementById('join');
+
+        window.addEventListener('scroll', () => {
+            if (!joinSection || !navbar) return;
+            const rect = joinSection.getBoundingClientRect();
+            // Hide navbar when footer enters viewport (visible at bottom)
+            if (rect.top <= window.innerHeight) {
+                navbar.classList.add('-translate-y-full');
+            } else {
+                navbar.classList.remove('-translate-y-full');
+            }
+        });
 
 
         // ------------------------------------------------------------------
@@ -361,7 +372,7 @@
                 btn.addEventListener("click", (e) => {
                 e.preventDefault();
                 resolve();
-                                                    }, { once: true });
+                                            }, { once: true });
             });
         }
 
@@ -518,7 +529,7 @@
             document.getElementById('group-email').classList.add('hidden');
             document.getElementById('group-password').classList.add('hidden');
             document.getElementById('group-remember').classList.add('hidden');
-            document.getElementById('field-confirm-password').classList.add('hidden');           
+            document.getElementById('field-confirm-password').classList.add('hidden');            
             document.getElementById('group-otp').classList.remove('hidden');
             document.getElementById('otp').focus(); // LIKE KISI File ko single click dena
             submitText.textContent = "VERIFY OTP";
@@ -611,6 +622,23 @@
                     // Optional: Add a visual indicator that it's now a dashboard link
                     heroBtn.classList.add('ring-2', 'ring-offset-2', 'ring-orange-500');
                 }
+
+                // 3. Update Mobile Menu Auth Section
+                const mobileAuth = document.getElementById('mobile-auth-section');
+                if (mobileAuth) {
+                    mobileAuth.innerHTML = `
+                        <div class="flex flex-col gap-4">
+                            <div class="flex items-center gap-3 mb-2 px-2">
+                                <div class="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold text-xl border-2 border-white/10">
+                                     ${currentUserData.pfp}
+                                </div>
+                                <div class="font-bold theme-text-primary uppercase tracking-widest text-lg">${currentUserData.username}</div>
+                            </div>
+                            <a href="/dashboard" class="w-full text-center py-4 border theme-border theme-text-primary font-bold hover:bg-white/10 tracking-[0.2em]">DASHBOARD</a>
+                            <button onclick="logout()" class="w-full text-center py-4 border border-red-500 text-red-500 font-bold hover:bg-red-500/10 tracking-[0.2em]">LOGOUT</button>
+                        </div>
+                    `;
+                }
             }
         }
 
@@ -626,7 +654,5 @@
             
         }
         submit_button.addEventListener("click", handleformsubmit);
-
-        
 
         
