@@ -3,6 +3,17 @@ lucide.createIcons();
         // --- GLOBAL STATE ---
         let cropper = null;
 
+        // --- TOGGLE TODO TIME PICKER ---
+        function toggleTodoTime() {
+            const checkbox = document.getElementById('toggle-todo');
+            const timePicker = document.getElementById('todo-time-picker');
+            if (checkbox.checked) {
+                timePicker.classList.remove('hidden');
+            } else {
+                timePicker.classList.add('hidden');
+            }
+        }
+
         // --- AUDIO ENGINE ---
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         
@@ -352,4 +363,25 @@ lucide.createIcons();
                 btn.innerHTML = '<i data-lucide="eye" class="w-4 h-4"></i>';
             }
             lucide.createIcons(); // Refresh icon
+        }
+    
+        async function updateClanNDB()
+        {
+            const btn = document.getElementById("toggle-clan-invite").checked;
+            const response = await fetch('/update/clan', {method:"POST" , headers: { "Content-Type": "application/json" },body: JSON.stringify({ allow_clan_invites: btn })});
+            return;
+        }
+
+        async function updateTodoTimeNDB()
+        {
+            const btn = document.getElementById("toggle-todo").checked;
+            const time = document.getElementById("todo-time").value;
+            const response = await fetch('/update/todo_time', {method:"POST" , headers: { "Content-Type": "application/json" },body: JSON.stringify({ allow_todo_time: btn, to_do_time: time })});
+            return;
+        }
+        async function updateExamNDB()
+        {
+          const btn = document.getElementById("toggle-exams").checked;
+          const response = await fetch('/update/exam_reminders', {method:"POST" , headers: { "Content-Type": "application/json" },body: JSON.stringify({ exam_reminders: btn })});
+          return;
         }

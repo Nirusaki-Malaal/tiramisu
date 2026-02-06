@@ -199,6 +199,19 @@ def update_profile():
     udb.update_bio(username, bio)
     return jsonify({"status": "success"})
 
+@app.route("/update/<function>", methods=["POST"])
+@login_required
+def update_notifications(function):
+    if function == "clan":
+        udb.set_clan_notifications(current_user.username, request.get_json().get("allow_clan_invites"))
+    
+    elif function == "exam_reminders" :
+        udb.set_exam_notification(current_user.username, request.get_json().get("allow_exam_reminders"))
+    
+    elif function == "todo_time":
+        udb.set_todo_time_notifications(current_user.username, request.get_json().get("allow_todo_time"), request.get_json().get("to_do_time"))
+        
+
 
 @app.route("/update_password", methods=["POST"])
 @login_required

@@ -34,3 +34,12 @@ class Users:
 
     def update_password(self, username: str, hashed_password: str):
         self.user.update_one({"username": username}, {"$set": {"password": hashed_password}})
+    
+    def set_exam_notification(self, username: str, status: bool):
+        self.user.update_one({"username": username}, {"$set": {"notification_settings": {"exam_reminders": status}}})
+    
+    def set_clan_notifications(self, username: str, allow_clan_invites: bool):
+        self.user.update_one({"username": username}, {"$set": {"notification_settings": {"clan_invites": allow_clan_invites}}})
+
+    def set_todo_time_notifications(self, username: str, allow_todo_time: bool, to_do_time):
+        self.user.update_one({"username": username}, {"$set": {"notification_settings": {"allow_todo_time": allow_todo_time, "to_do_time": str(to_do_time)}}})
