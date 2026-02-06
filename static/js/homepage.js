@@ -34,7 +34,23 @@
         // MOBILE MENU
         const mobileMenuBtn = document.getElementById('mobile-menu-btn');
         const mobileMenu = document.getElementById('mobile-menu');
-        mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+        const mobileMenuClose = document.getElementById('mobile-menu-close');
+
+        function openMobileMenu() {
+            mobileMenu.classList.remove('mobile-menu-hidden');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeMobileMenu() {
+            mobileMenu.classList.add('mobile-menu-hidden');
+            document.body.style.overflow = '';
+        }
+        mobileMenuBtn.addEventListener('click', openMobileMenu);
+        mobileMenuClose.addEventListener('click', closeMobileMenu);
+
+        // Close mobile menu when clicking nav links
+        mobileMenu.querySelectorAll('.mobile-nav-link').forEach(link => {
+            link.addEventListener('click', closeMobileMenu);
+        });
 
         // ==========================================
         // RESTORED USER JAVASCRIPT LOGIC
@@ -456,6 +472,7 @@
                         const err = document.getElementById('err-password');
                         err.textContent = "INVALID CREDENTIALS";
                         err.classList.remove('hidden');
+                        location.reload();
                         return;
                     }
                     if (result.status === "success")
@@ -623,19 +640,32 @@
                     heroBtn.classList.add('ring-2', 'ring-offset-2', 'ring-orange-500');
                 }
 
+                // 2b. Update Footer CTA Button
+                const footerBtn = document.getElementById('footer-cta-btn');
+                const footerText = document.getElementById('footer-cta-text');
+                if (footerBtn && footerText) {
+                    footerBtn.onclick = function() {
+                        window.location.href = '/dashboard';
+                    };
+                    footerText.textContent = "DASHBOARD";
+                }
+
                 // 3. Update Mobile Menu Auth Section
                 const mobileAuth = document.getElementById('mobile-auth-section');
                 if (mobileAuth) {
                     mobileAuth.innerHTML = `
-                        <div class="flex flex-col gap-4">
-                            <div class="flex items-center gap-3 mb-2 px-2">
+                        <div class="flex flex-col gap-3">
+                            <div class="flex items-center gap-4 mb-3 px-2 py-3 bg-white/5 rounded-sm border border-white/10">
                                 <div class="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold text-xl border-2 border-white/10">
                                      ${currentUserData.pfp}
                                 </div>
-                                <div class="font-bold theme-text-primary uppercase tracking-widest text-lg">${currentUserData.username}</div>
+                                <div>
+                                    <div class="font-bold text-white uppercase tracking-widest text-lg">${currentUserData.username}</div>
+                                    <div class="text-xs text-gray-500 tracking-widest">RANK ${currentUserData.rank}</div>
+                                </div>
                             </div>
-                            <a href="/dashboard" class="w-full text-center py-4 border theme-border theme-text-primary font-bold hover:bg-white/10 tracking-[0.2em]">DASHBOARD</a>
-                            <button onclick="logout()" class="w-full text-center py-4 border border-red-500 text-red-500 font-bold hover:bg-red-500/10 tracking-[0.2em]">LOGOUT</button>
+                            <a href="/dashboard" class="w-full text-center py-4 bg-white/10 border border-white/10 text-white font-bold hover:bg-white/20 tracking-[0.2em] transition-colors clip-button">DASHBOARD</a>
+                            <button onclick="logout()" class="w-full text-center py-4 border border-red-500/50 text-red-500 font-bold hover:bg-red-500/10 tracking-[0.2em] transition-colors clip-button">LOGOUT</button>
                         </div>
                     `;
                 }

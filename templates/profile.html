@@ -166,10 +166,6 @@
                         <i data-lucide="lock" class="w-5 h-5 md:w-4 md:h-4"></i>
                         <span class="uppercase tracking-wide font-bold hidden md:inline">Security</span>
                     </button>
-                    <button onclick="switchTab('clan')" class="tab-btn flex-1 md:flex-none w-full text-center md:text-left py-4 md:py-5 text-xs md:text-sm font-mono text-neutral-400 flex items-center justify-center md:justify-start gap-2 md:gap-4 whitespace-nowrap px-4 md:px-8">
-                        <i data-lucide="shield" class="w-5 h-5 md:w-4 md:h-4"></i>
-                        <span class="uppercase tracking-wide font-bold hidden md:inline">Clan</span>
-                    </button>
                     <button onclick="switchTab('notifications')" class="tab-btn flex-1 md:flex-none w-full text-center md:text-left py-4 md:py-5 text-xs md:text-sm font-mono text-neutral-400 flex items-center justify-center md:justify-start gap-2 md:gap-4 whitespace-nowrap px-4 md:px-8">
                         <i data-lucide="bell" class="w-5 h-5 md:w-4 md:h-4"></i>
                         <span class="uppercase tracking-wide font-bold hidden md:inline">Alerts</span>
@@ -299,7 +295,12 @@
                             <label class="w-40 text-right text-xs font-mono text-neutral-500 uppercase tracking-wider hidden md:block">Old Password</label>
                             <div class="flex-1">
                                 <label class="md:hidden text-[10px] font-mono text-neutral-500 uppercase font-bold">Old Password</label>
-                                <input type="password" id="old-pass" class="shingaku-input editable w-full p-3 md:p-4 rounded-sm text-sm tracking-widest" placeholder="••••••••">
+                                <div class="relative">
+                                    <input type="password" id="old-pass" class="shingaku-input editable w-full p-3 md:p-4 pr-12 rounded-sm text-sm tracking-widest" placeholder="••••••••">
+                                    <button type="button" onclick="togglePassword('old-pass', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white transition-colors">
+                                        <i data-lucide="eye" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
@@ -307,7 +308,12 @@
                             <label class="w-40 text-right text-xs font-mono text-neutral-500 uppercase tracking-wider hidden md:block">New Password</label>
                             <div class="flex-1">
                                 <label class="md:hidden text-[10px] font-mono text-neutral-500 uppercase font-bold">New Password</label>
-                                <input type="password" id="new-pass" class="shingaku-input editable w-full p-3 md:p-4 rounded-sm text-sm tracking-widest" placeholder="••••••••">
+                                <div class="relative">
+                                    <input type="password" id="new-pass" class="shingaku-input editable w-full p-3 md:p-4 pr-12 rounded-sm text-sm tracking-widest" placeholder="••••••••">
+                                    <button type="button" onclick="togglePassword('new-pass', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white transition-colors">
+                                        <i data-lucide="eye" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
@@ -315,7 +321,12 @@
                             <label class="w-40 text-right text-xs font-mono text-neutral-500 uppercase tracking-wider hidden md:block">Confirm New</label>
                             <div class="flex-1">
                                 <label class="md:hidden text-[10px] font-mono text-neutral-500 uppercase font-bold">Confirm New</label>
-                                <input type="password" id="confirm-pass" class="shingaku-input editable w-full p-3 md:p-4 rounded-sm text-sm tracking-widest" placeholder="••••••••">
+                                <div class="relative">
+                                    <input type="password" id="confirm-pass" class="shingaku-input editable w-full p-3 md:p-4 pr-12 rounded-sm text-sm tracking-widest" placeholder="••••••••">
+                                    <button type="button" onclick="togglePassword('confirm-pass', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white transition-colors">
+                                        <i data-lucide="eye" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
@@ -323,31 +334,6 @@
                             <button onclick="handleChangePassword()" class="clip-btn w-full md:w-auto px-10 py-4 bg-white hover:bg-neutral-200 text-black font-bold uppercase tracking-widest text-sm transition-all hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] transform hover:-translate-y-1">
                                 Update Password
                             </button>
-                        </div>
-                    </div>
-
-                    <!-- TAB: CLAN SETTINGS -->
-                    <div id="tab-clan" class="tab-content hidden space-y-6 md:space-y-8 max-w-3xl">
-                        <h3 class="font-teko text-2xl md:text-3xl text-white uppercase mb-4 md:mb-8 border-b border-white/10 pb-4">Noble House Affiliation</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                            <!-- Shiba Clan -->
-                            <label class="cursor-pointer group" onclick="playClickSound()">
-                                <input type="radio" name="clan" class="peer hidden" checked>
-                                <div class="border border-[var(--reishi)] bg-[var(--reishi)]/10 p-6 md:p-8 text-center relative overflow-hidden group clip-angle peer-checked:bg-[var(--reishi)]/20 peer-checked:border-[var(--reishi)] peer-checked:shadow-[0_0_20px_rgba(0,210,255,0.2)] transition-all">
-                                    <div class="text-3xl md:text-4xl font-teko font-bold mb-2">SHIBA</div>
-                                    <div class="text-xs md:text-sm font-mono text-[var(--reishi)] font-bold uppercase tracking-wider">Fireworks Experts</div>
-                                    <div class="mt-4 inline-block px-3 py-1 bg-[var(--reishi)] text-black text-[10px] font-bold uppercase">Current House</div>
-                                </div>
-                            </label>
-                            <!-- Kuchiki Clan -->
-                            <label class="cursor-pointer group" onclick="playClickSound()">
-                                <input type="radio" name="clan" class="peer hidden">
-                                <div class="border border-white/10 p-6 md:p-8 text-center relative overflow-hidden group clip-angle hover:bg-white/5 transition-all peer-checked:border-white peer-checked:bg-white/10">
-                                    <div class="text-3xl md:text-4xl font-teko font-bold mb-2 text-neutral-400 group-hover:text-white">KUCHIKI</div>
-                                    <div class="text-xs md:text-sm font-mono text-neutral-500 font-bold uppercase tracking-wider group-hover:text-white">Law & Order</div>
-                                    <div class="mt-4 text-[10px] text-neutral-600 group-hover:text-neutral-400">Request Transfer</div>
-                                </div>
-                            </label>
                         </div>
                     </div>
 
@@ -365,11 +351,119 @@
                     <!-- TAB: WAKE ME UP -->
                     <div id="tab-wake" class="tab-content hidden space-y-6 md:space-y-8 max-w-3xl">
                         <h3 class="font-teko text-2xl md:text-3xl text-white uppercase mb-4 md:mb-8 border-b border-white/10 pb-4">Wake Me Up Settings</h3>
+                        
+                        <p class="text-xs font-mono text-neutral-400 leading-relaxed bg-white/[0.02] border border-white/5 p-4 rounded-sm">
+                            <i data-lucide="info" class="w-3 h-3 inline mr-1 text-[var(--reishi)]"></i>
+                            Allow your friends to ring your phone to wake you up. Configure who can reach you and how.
+                        </p>
+
+                        <!-- Master Toggle -->
+                        <div class="flex items-center justify-between p-5 border border-[var(--reishi)]/20 bg-[var(--reishi)]/5 rounded-sm">
+                            <div>
+                                <h4 class="text-white font-bold text-xs md:text-sm uppercase tracking-wide">Enable Wake Me Up</h4>
+                                <p class="text-neutral-500 text-[10px] md:text-xs font-mono mt-1">Allow friends to ring your phone remotely.</p>
+                            </div>
+                            <div class="relative inline-block w-12 mr-2 align-middle select-none">
+                                <input type="checkbox" name="wake-master" id="wake-master" onclick="playClickSound()" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer border-neutral-700 checked:right-0 checked:border-[var(--reishi)] transition-all duration-300" checked/>
+                                <label for="wake-master" class="toggle-label block overflow-hidden h-6 rounded-full bg-neutral-800 cursor-pointer"></label>
+                            </div>
+                        </div>
+
+                        <!-- Schedule -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                             <div class="space-y-2 md:space-y-4">
-                                <label class="text-[10px] md:text-xs font-mono text-neutral-500 uppercase tracking-widest block">Wake Up Time</label>
-                                <input type="time" class="shingaku-input editable w-full p-4 rounded-sm text-xl font-bold tracking-widest font-mono text-center" value="06:00">
+                                <label class="text-[10px] md:text-xs font-mono text-neutral-500 uppercase tracking-widest block">Wake Window Start</label>
+                                <input type="time" id="wake-start" class="shingaku-input editable w-full p-4 rounded-sm text-xl font-bold tracking-widest font-mono text-center" value="06:00">
+                                <p class="text-[10px] font-mono text-neutral-600">Friends can ring you after this time.</p>
                             </div>
+                            <div class="space-y-2 md:space-y-4">
+                                <label class="text-[10px] md:text-xs font-mono text-neutral-500 uppercase tracking-widest block">Wake Window End</label>
+                                <input type="time" id="wake-end" class="shingaku-input editable w-full p-4 rounded-sm text-xl font-bold tracking-widest font-mono text-center" value="09:00">
+                                <p class="text-[10px] font-mono text-neutral-600">Rings are blocked after this time.</p>
+                            </div>
+                        </div>
+
+                        <!-- Who Can Ring -->
+                        <div class="space-y-4">
+                            <label class="text-[10px] md:text-xs font-mono text-neutral-500 uppercase tracking-widest block">Who Can Ring You</label>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <label class="cursor-pointer group" onclick="playClickSound()">
+                                    <input type="radio" name="wake-access" class="peer hidden" value="everyone">
+                                    <div class="border border-white/10 p-4 text-center clip-angle hover:bg-white/5 transition-all peer-checked:border-[var(--reishi)] peer-checked:bg-[var(--reishi)]/10 peer-checked:shadow-[0_0_15px_rgba(0,210,255,0.1)]">
+                                        <i data-lucide="globe" class="w-5 h-5 mx-auto mb-2 text-neutral-500 peer-checked:text-[var(--reishi)]"></i>
+                                        <div class="text-xs font-bold uppercase tracking-wide text-neutral-400">Everyone</div>
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer group" onclick="playClickSound()">
+                                    <input type="radio" name="wake-access" class="peer hidden" value="friends" checked>
+                                    <div class="border border-white/10 p-4 text-center clip-angle hover:bg-white/5 transition-all peer-checked:border-[var(--reishi)] peer-checked:bg-[var(--reishi)]/10 peer-checked:shadow-[0_0_15px_rgba(0,210,255,0.1)]">
+                                        <i data-lucide="users" class="w-5 h-5 mx-auto mb-2 text-neutral-500 peer-checked:text-[var(--reishi)]"></i>
+                                        <div class="text-xs font-bold uppercase tracking-wide text-neutral-400">Friends Only</div>
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer group" onclick="playClickSound()">
+                                    <input type="radio" name="wake-access" class="peer hidden" value="nobody">
+                                    <div class="border border-white/10 p-4 text-center clip-angle hover:bg-white/5 transition-all peer-checked:border-[var(--reishi)] peer-checked:bg-[var(--reishi)]/10 peer-checked:shadow-[0_0_15px_rgba(0,210,255,0.1)]">
+                                        <i data-lucide="shield-off" class="w-5 h-5 mx-auto mb-2 text-neutral-500 peer-checked:text-[var(--reishi)]"></i>
+                                        <div class="text-xs font-bold uppercase tracking-wide text-neutral-400">Nobody</div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Ring Settings -->
+                        <div class="space-y-4 md:space-y-6">
+                            <label class="text-[10px] md:text-xs font-mono text-neutral-500 uppercase tracking-widest block">Ring Behavior</label>
+
+                            <div class="flex items-center justify-between p-4 border border-white/5 bg-white/[0.02] rounded-sm">
+                                <div>
+                                    <h4 class="text-white font-bold text-xs md:text-sm uppercase">Override Silent Mode</h4>
+                                    <p class="text-neutral-500 text-[10px] md:text-xs font-mono mt-1">Ring even when your phone is on silent.</p>
+                                </div>
+                                <div class="relative inline-block w-12 mr-2 align-middle select-none">
+                                    <input type="checkbox" name="wake-override" id="wake-override" onclick="playClickSound()" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer border-neutral-700 checked:right-0 checked:border-[var(--reishi)] transition-all duration-300" checked/>
+                                    <label for="wake-override" class="toggle-label block overflow-hidden h-6 rounded-full bg-neutral-800 cursor-pointer"></label>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between p-4 border border-white/5 bg-white/[0.02] rounded-sm">
+                                <div>
+                                    <h4 class="text-white font-bold text-xs md:text-sm uppercase">Vibrate Only</h4>
+                                    <p class="text-neutral-500 text-[10px] md:text-xs font-mono mt-1">Vibrate instead of ringing with sound.</p>
+                                </div>
+                                <div class="relative inline-block w-12 mr-2 align-middle select-none">
+                                    <input type="checkbox" name="wake-vibrate" id="wake-vibrate" onclick="playClickSound()" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer border-neutral-700 checked:right-0 checked:border-[var(--reishi)] transition-all duration-300"/>
+                                    <label for="wake-vibrate" class="toggle-label block overflow-hidden h-6 rounded-full bg-neutral-800 cursor-pointer"></label>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between p-4 border border-white/5 bg-white/[0.02] rounded-sm">
+                                <div>
+                                    <h4 class="text-white font-bold text-xs md:text-sm uppercase">Repeat Ring</h4>
+                                    <p class="text-neutral-500 text-[10px] md:text-xs font-mono mt-1">Ring again after 2 minutes if not dismissed.</p>
+                                </div>
+                                <div class="relative inline-block w-12 mr-2 align-middle select-none">
+                                    <input type="checkbox" name="wake-repeat" id="wake-repeat" onclick="playClickSound()" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer border-neutral-700 checked:right-0 checked:border-[var(--reishi)] transition-all duration-300" checked/>
+                                    <label for="wake-repeat" class="toggle-label block overflow-hidden h-6 rounded-full bg-neutral-800 cursor-pointer"></label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Max Rings Per Day -->
+                        <div class="space-y-2 md:space-y-4">
+                            <label class="text-[10px] md:text-xs font-mono text-neutral-500 uppercase tracking-widest block">Max Rings Per Day</label>
+                            <div class="flex items-center gap-4">
+                                <input type="range" id="wake-max-rings" min="1" max="10" value="3" class="flex-1 h-1 bg-neutral-800 rounded-full appearance-none cursor-pointer accent-[var(--reishi)]" oninput="document.getElementById('ring-count').textContent = this.value">
+                                <span id="ring-count" class="text-lg font-bold font-mono text-[var(--reishi)] w-8 text-center">3</span>
+                            </div>
+                            <p class="text-[10px] font-mono text-neutral-600">Limit how many times friends can ring you in a day.</p>
+                        </div>
+
+                        <!-- Save Button -->
+                        <div class="flex justify-end pt-4 md:pt-8 pb-8">
+                            <button onclick="playClickSound(); showToast('Wake Me Up settings saved.', 'success')" class="clip-btn w-full md:w-auto px-10 py-4 bg-[var(--reishi)] hover:bg-cyan-400 text-black font-bold uppercase tracking-widest text-sm transition-all hover:shadow-[0_0_20px_rgba(0,210,255,0.4)] transform hover:-translate-y-1">
+                                Save Settings
+                            </button>
                         </div>
                     </div>
 

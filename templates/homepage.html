@@ -75,14 +75,43 @@
             <button id="mobile-menu-btn" class="md:hidden text-white p-2 z-50"><i data-lucide="menu" class="h-8 w-8"></i></button>
         </div>
 
-        <!-- Mobile Menu (FIXED RESPONSIVENESS AND VISIBILITY) -->
-        <div id="mobile-menu" class="fixed inset-0 z-40 hidden flex-col pt-24 px-6 gap-8 transition-transform duration-300 overflow-y-auto" style="background-color: var(--bg-secondary);">
-            <div class="absolute inset-0 bg-black/80 pointer-events-none"></div> <!-- Dark overlay for readability -->
-            <a href="#academy" class="relative z-10 text-3xl font-bold tracking-[0.2em] theme-text-primary hover:text-orange-500 transition-colors border-b theme-border pb-4">ACADEMY</a>
-            <a href="#squads" class="relative z-10 text-3xl font-bold tracking-[0.2em] theme-text-primary hover:text-orange-500 transition-colors border-b theme-border pb-4">FEATURES</a>
-            <a href="#captains" class="relative z-10 text-3xl font-bold tracking-[0.2em] theme-text-primary hover:text-orange-500 transition-colors border-b theme-border pb-4">CREATORS</a>
-            <div id="mobile-auth-section" class="relative z-10 mt-auto pb-12">
-                <button onclick="openAuthModal('signup'); document.getElementById('mobile-menu').classList.add('hidden');" class="w-full clip-button bg-white text-black py-4 font-bold hover:bg-orange-500 hover:text-white transition-all tracking-widest text-lg">ENROLL NOW</button>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="fixed inset-0 z-[100] flex-col transition-all duration-300 overflow-y-auto mobile-menu-hidden" style="display: flex;">
+            <!-- Solid opaque background -->
+            <div class="mobile-menu-bg absolute inset-0"></div>
+            
+            <!-- Close button -->
+            <div class="relative z-10 flex items-center justify-between px-6 py-5 border-b border-white/10">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-white/10 clip-button flex items-center justify-center">
+                        <i data-lucide="sword" class="h-4 w-4 text-white"></i>
+                    </div>
+                    <span class="text-lg font-bold tracking-widest heading-font text-white">SHIN<span class="text-orange-500">GAKU</span></span>
+                </div>
+                <button id="mobile-menu-close" class="text-white p-2 hover:text-orange-500 transition-colors">
+                    <i data-lucide="x" class="h-7 w-7"></i>
+                </button>
+            </div>
+
+            <!-- Nav Links -->
+            <nav class="relative z-10 flex flex-col px-6 pt-8 gap-2 flex-1">
+                <a href="#academy" class="mobile-nav-link flex items-center gap-4 py-4 px-4 text-xl font-bold tracking-[0.15em] text-white/80 hover:text-orange-500 hover:bg-white/5 transition-all border-b border-white/5">
+                    <i data-lucide="layers" class="w-5 h-5 text-orange-500/60"></i>
+                    PLATFORM
+                </a>
+                <a href="#squads" class="mobile-nav-link flex items-center gap-4 py-4 px-4 text-xl font-bold tracking-[0.15em] text-white/80 hover:text-orange-500 hover:bg-white/5 transition-all border-b border-white/5">
+                    <i data-lucide="zap" class="w-5 h-5 text-orange-500/60"></i>
+                    FEATURES
+                </a>
+                <a href="#captains" class="mobile-nav-link flex items-center gap-4 py-4 px-4 text-xl font-bold tracking-[0.15em] text-white/80 hover:text-orange-500 hover:bg-white/5 transition-all border-b border-white/5">
+                    <i data-lucide="users" class="w-5 h-5 text-orange-500/60"></i>
+                    CREATORS
+                </a>
+            </nav>
+
+            <!-- Auth Section -->
+            <div id="mobile-auth-section" class="relative z-10 px-6 pb-10 pt-4">
+                <button onclick="openAuthModal('signup'); closeMobileMenu();" class="w-full clip-button bg-orange-500 text-black py-4 font-bold hover:bg-orange-400 transition-all tracking-widest text-lg">ENROLL NOW</button>
             </div>
         </div>
     </nav>
@@ -197,10 +226,10 @@
             </div>
             <div class="bento-grid">
                 <!-- 1. Gikon AI -->
-                <div class="bento-item md:col-span-2 md:row-span-2 clip-cut-corner group p-8 flex flex-col justify-between">
+                <div class="bento-item md:col-span-2 md:row-span-2 lg:col-span-2 lg:row-span-2 clip-cut-corner group p-8 flex flex-col justify-between">
                     <!-- Background GIF: Matrix Rain / Code -->
-                    <div class="absolute inset-0 bg-[url('https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExanJoZHR2bzBsNDFsNTcybzh3ZzFxbHQzOTYwYXU0M2Mzd3V2bGp3ayZlcD12MV9naWZzX3NlYXJjaCZjdD1n/4ilFRqgbzbx4c/giphy.webp')] bg-cover bg-center opacity-10 group-hover:opacity-30 transition-opacity duration-500"></div>
-                    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-black/80 to-black z-0"></div>
+                    <div class="absolute inset-0 bg-[url('https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExanJoZHR2bzBsNDFsNTcybzh3ZzFxbHQzOTYwYXU0M2Mzd3V2bGp3ayZlcD12MV9naWZzX3NlYXJjaCZjdD1n/4ilFRqgbzbx4c/giphy.webp')] bg-cover bg-center opacity-25 group-hover:opacity-50 transition-opacity duration-500"></div>
+                    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-black/60 to-black/90 z-0"></div>
                     <div class="absolute top-0 right-0 p-8 opacity-20 group-hover:opacity-40 transition-opacity duration-500 z-10"><i data-lucide="bot" class="w-48 h-48 theme-accent-primary"></i></div>
                     <div class="relative z-10">
                         <div class="flex items-center gap-2 mb-4"><span class="px-3 py-1 border theme-border theme-accent-primary text-xs font-bold rounded-full inline-block">SQUAD 12</span></div>
@@ -209,10 +238,10 @@
                     </div>
                 </div>
                 <!-- 2. Squad Archives -->
-                <div class="bento-item md:col-span-1 md:row-span-2 clip-cut-corner p-6 flex flex-col relative group overflow-hidden reveal-hidden delay-200">
+                <div class="bento-item md:col-span-1 md:row-span-2 lg:col-span-1 lg:row-span-2 clip-cut-corner p-6 flex flex-col relative group overflow-hidden reveal-hidden delay-200">
                      <!-- Background GIF: Library/Books -->
-                     <div class="absolute inset-0 bg-[url('https://i.giphy.com/RtLdbbSnz99YZk8mzt.webp')] bg-cover bg-center opacity-10 group-hover:opacity-30 transition-opacity duration-500"></div>
-                     <div class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent z-0"></div>
+                     <div class="absolute inset-0 bg-[url('https://i.giphy.com/RtLdbbSnz99YZk8mzt.webp')] bg-cover bg-center opacity-25 group-hover:opacity-50 transition-opacity duration-500"></div>
+                     <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-0"></div>
                     <div class="relative z-10 mt-auto">
                         <i data-lucide="library" class="w-8 h-8 text-cyan-400 mb-4"></i>
                         <h3 class="text-2xl font-bold text-white mb-0">SQUAD ARCHIVES</h3>
@@ -222,30 +251,30 @@
                 <!-- 3. Mission Log -->
                 <div class="bento-item md:col-span-1 p-6 relative group reveal-hidden delay-400">
                     <!-- Background GIF: Checklist/Writing -->
-                    <div class="absolute inset-0 bg-[url('https://i.giphy.com/rp12YrwLz2cqYTPwsX.webp')] bg-cover bg-center opacity-10 group-hover:opacity-30 transition-opacity duration-500"></div>
-                    <div class="absolute inset-0 bg-black/80 z-0"></div>
+                    <div class="absolute inset-0 bg-[url('https://i.giphy.com/rp12YrwLz2cqYTPwsX.webp')] bg-cover bg-center opacity-25 group-hover:opacity-50 transition-opacity duration-500"></div>
+                    <div class="absolute inset-0 bg-black/60 z-0"></div>
                     <div class="relative z-10"><i data-lucide="clipboard-list" class="w-8 h-8 text-purple-500 mb-4"></i><h3 class="text-xl font-bold theme-text-primary">TO DO LIST</h3><p class="theme-text-secondary text-sm">Strategic To-Do Lists & Notes.</p></div>
                 </div>
                 <!-- 4. Ancient Scrolls -->
                 <div class="bento-item md:col-span-1 p-6 relative group reveal-hidden delay-400">
                     <!-- Background GIF: Old Scrolls/Paper -->
-                    <div class="absolute inset-0 bg-[url('https://i.giphy.com/tptFQ8QAJYYvu.webp')] bg-cover bg-center opacity-10 group-hover:opacity-30 transition-opacity duration-500"></div>
-                    <div class="absolute inset-0 bg-black/80 z-0"></div>
+                    <div class="absolute inset-0 bg-[url('https://i.giphy.com/tptFQ8QAJYYvu.webp')] bg-cover bg-center opacity-25 group-hover:opacity-50 transition-opacity duration-500"></div>
+                    <div class="absolute inset-0 bg-black/60 z-0"></div>
                     <div class="relative z-10"><i data-lucide="scroll" class="w-8 h-8 text-yellow-500 mb-4"></i><h3 class="text-xl font-bold theme-text-primary">PYQ'S</h3><p class="theme-text-secondary text-sm">Previous Year Papers & Assignments.</p></div>
                 </div>
                 <!-- 5. Senkaimon Digitizer -->
-                <div class="bento-item md:col-span-2 p-8 flex items-center justify-between group overflow-hidden reveal-hidden delay-200">
+                <div class="bento-item md:col-span-1 lg:col-span-2 p-8 flex items-center justify-between group overflow-hidden reveal-hidden delay-200">
                     <!-- Background GIF: Portal/Scanning -->
-                    <div class="absolute inset-0 bg-[url('')] bg-cover bg-center opacity-10 group-hover:opacity-30 transition-opacity duration-500"></div>
-                    <div class="absolute inset-0 bg-black/90 z-0"></div>
+                    <div class="absolute inset-0 bg-[url('')] bg-cover bg-center opacity-25 group-hover:opacity-50 transition-opacity duration-500"></div>
+                    <div class="absolute inset-0 bg-black/70 z-0"></div>
                     <div class="relative z-10"><h3 class="text-2xl font-bold theme-text-primary mb-1">DIGITIZER</h3><p class="theme-text-secondary text-sm">Transmute Physical Paper Into Digital CBT Exams.</p><button class="mt-6 text-xs font-bold border-b theme-border pb-1 hover:text-orange-500 transition-colors">OPEN GATE</button></div>
                     <div class="relative z-10"><i data-lucide="scan-line" class="w-10 h-10 theme-text-secondary"></i></div>
                 </div>
                 <!-- 6. Faction Wars (Small) -->
                 <div class="bento-item md:col-span-1 p-6 relative group reveal-hidden delay-400">
                     <!-- Background GIF: Map/Strategy -->
-                    <div class="absolute inset-0 bg-[url('https://i.giphy.com/tptFQ8QAJYYvu.webp')] bg-cover bg-center opacity-10 group-hover:opacity-30 transition-opacity duration-500"></div>
-                    <div class="absolute inset-0 bg-black/80 z-0"></div>
+                    <div class="absolute inset-0 bg-[url('https://i.giphy.com/tptFQ8QAJYYvu.webp')] bg-cover bg-center opacity-25 group-hover:opacity-50 transition-opacity duration-500"></div>
+                    <div class="absolute inset-0 bg-black/60 z-0"></div>
                     <div class="relative z-10">
                         <i data-lucide="users" class="w-8 h-8 text-red-500 mb-4"></i>
                         <h3 class="text-xl font-bold theme-text-primary">CLASH OF CLANS</h3>
@@ -256,8 +285,8 @@
                 <!-- 7. Tenteikura (Small) -->
                 <div class="bento-item md:col-span-1 p-6 relative group reveal-hidden delay-400">
                     <!-- Background GIF: Signal/Radar -->
-                    <div class="absolute inset-0 bg-[url('https://i.giphy.com/5lAtcHWPAYFdS.webp')] bg-cover bg-center opacity-10 group-hover:opacity-30 transition-opacity duration-500"></div>
-                    <div class="absolute inset-0 bg-black/80 z-0"></div>
+                    <div class="absolute inset-0 bg-[url('https://i.giphy.com/5lAtcHWPAYFdS.webp')] bg-cover bg-center opacity-25 group-hover:opacity-50 transition-opacity duration-500"></div>
+                    <div class="absolute inset-0 bg-black/60 z-0"></div>
                     <div class="relative z-10">
                         <i data-lucide="bell" class="w-8 h-8 text-green-500 mb-4"></i>
                         <h3 class="text-xl font-bold theme-text-primary">FUN ELEMENT</h3>
@@ -297,7 +326,7 @@
         <!-- Background Video Placeholder -->
         <div class="absolute inset-0 z-0">
              <!-- Replace with your actual video source -->
-             <video autoplay muted loop playsinline class="w-full h-full object-cover opacity-50">
+             <video autoplay muted loop playsinline class="w-full h-full object-cover opacity-50 mobile-video">
                  <source src="/static/assets/input.mp4" type="video/mp4">
              </video>
              <!-- Fallback GIF -->
@@ -314,9 +343,9 @@
             <h2 class="text-4xl md:text-6xl font-bold theme-text-primary mb-4">READY TO AWAKEN?</h2>
             <p class="text-2xl font-jp font-bold theme-text-secondary mb-8">覚醒せよ</p>
             <p class="theme-text-secondary mb-10 max-w-xl mx-auto">Join others in the Metagame Layer.</p>
-            <button onclick="openAuthModal('signup')" class="theme-btn-primary p-4 px-8 font-bold tracking-[0.2em] clip-cut-corner transition-all flex flex-col items-center mx-auto"><span>INITIATE</span></button>
+            <button id="footer-cta-btn" onclick="openAuthModal('signup')" class="theme-btn-primary p-4 px-8 font-bold tracking-[0.2em] clip-cut-corner transition-all flex flex-col items-center mx-auto"><span id="footer-cta-text">INITIATE</span></button>
             <div class="mt-20 flex justify-center gap-8 theme-text-secondary text-sm font-mono uppercase tracking-widest">
-                <a href="#" class="hover:text-white transition-colors">Twitter</a><a href="#" class="hover:text-white transition-colors">Discord</a>
+                <a href="https://github.com/Nirusaki-Malaal" target="_blank" class="hover:text-white transition-colors flex items-center gap-2"><i data-lucide="github" class="w-4 h-4"></i>Nirusaki</a><a href="https://github.com/shubhfront" target="_blank" class="hover:text-white transition-colors flex items-center gap-2"><i data-lucide="github" class="w-4 h-4"></i>Shubhfront</a>
             </div>
             <p class="mt-8 theme-text-secondary text-xs">© 2026 SHINGAKU. FORGED BY <a href="https://github.com/Nirusaki-Malaal" target="_blank" class="hover:text-orange-500 transition-colors">NIRUSAKI</a> & <a href="https://github.com/shubhfront" target="_blank" class="hover:text-orange-500 transition-colors">SHUBHFRONT</a>.</p>
         </div>

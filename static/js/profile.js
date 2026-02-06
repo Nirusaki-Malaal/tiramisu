@@ -254,16 +254,20 @@ lucide.createIcons();
                 return;
             }
             
-            response = await fetch("/update_password", {method:"POST", headers:{"Content-Type": "application/json"}, body: JSON.stringify({oldpass: oldPass, newpass: newPass})});
-            if (response.status === "success")
+            let response = await fetch("/update_password", {method:"POST", headers:{"Content-Type": "application/json"}, body: JSON.stringify({oldpass: oldPass, newpass: newPass})});
+            const come = await response.json();
+            if (come.status === "success")
             {
-                    showToast("Security Clearance Updated. Reloading...", 'success');
+                    setTimeout(showToast("Password Updated Reloading...", 'success'),2000);
+                    location.reload();
                     
             }
             else 
             {
 
-                showToast("Invalid Password", 'error');
+                setTimeout(showToast("Invalid Password", 'error'), 2000);
+                location.reload();
+
             }
             
         }
@@ -335,4 +339,17 @@ lucide.createIcons();
             await fetchUserProfile();
         });
 
-        
+        function togglePassword(inputId, btn) {
+            const input = document.getElementById(inputId);
+            const icon = btn.querySelector('i');
+            
+            if (input.type === "password") {
+                input.type = "text";
+                // Switch icon to eye-off (requires re-rendering icon or changing attribute if lucide supports dynamic swap, simpler to just replace innerHTML)
+                btn.innerHTML = '<i data-lucide="eye-off" class="w-4 h-4"></i>';
+            } else {
+                input.type = "password";
+                btn.innerHTML = '<i data-lucide="eye" class="w-4 h-4"></i>';
+            }
+            lucide.createIcons(); // Refresh icon
+        }
