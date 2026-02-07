@@ -121,7 +121,7 @@
                 max-width: none !important;
                 transform: translate(-50%, -50%) rotate(90deg);
                 transform-origin: center center;
-                object-fit: contain !important;
+                object-fit: cover !important;
             }
         }
 
