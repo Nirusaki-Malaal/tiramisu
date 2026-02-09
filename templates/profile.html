@@ -8,9 +8,6 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     
-    <!-- Cropper.js for Image Editing -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <link rel="stylesheet" href="/static/css/profile.css">
 </head>
 <body class="flex flex-col h-screen">
@@ -48,20 +45,22 @@
                         <input type="password" id="delete-password" class="shingaku-input danger-input w-full p-3 text-sm font-bold tracking-widest text-center" placeholder="••••••••">
                     </div>
                 </div>
-                <button onclick="verifyDeletePassword()" class="w-full clip-btn px-6 py-3 bg-[var(--danger)] text-white hover:bg-red-600 text-xs font-bold uppercase tracking-widest transition-colors shadow-lg shadow-red-900/20">
-                    Verify & Send OTP
+                <button id="delete-verify-btn" onclick="verifyDeletePassword()" class="w-full clip-btn px-6 py-3 bg-[var(--danger)] text-white hover:bg-red-600 text-xs font-bold uppercase tracking-widest transition-colors shadow-lg shadow-red-900/20">
+                    <span id="delete-verify-text">Verify & Send OTP</span>
                 </button>
             </div>
 
             <!-- Step 2: OTP (Hidden) -->
             <div id="delete-step-2" class="hidden">
                 <p class="text-xs text-center text-white mb-4 bg-white/5 p-3 rounded border border-white/10">
-                    Code sent to <span class="text-[var(--reishi)] font-bold">Soul Pager</span>
+                    Code sent to <span class="text-[var(--reishi)] font-bold" id="delete-email-hint">your email</span>
                 </p>
                 <div class="space-y-4 mb-6">
                     <div>
-                        <label class="text-[10px] font-mono text-neutral-500 uppercase font-bold block mb-2">Enter 4-Digit Code</label>
+                        <label class="text-[10px] font-mono text-neutral-500 uppercase font-bold block mb-2">Enter 6-Digit Code</label>
                         <div class="flex justify-center gap-2">
+                            <input type="text" maxlength="1" class="otp-input shingaku-input danger-input w-12 h-12 text-center text-xl font-bold rounded">
+                            <input type="text" maxlength="1" class="otp-input shingaku-input danger-input w-12 h-12 text-center text-xl font-bold rounded">
                             <input type="text" maxlength="1" class="otp-input shingaku-input danger-input w-12 h-12 text-center text-xl font-bold rounded">
                             <input type="text" maxlength="1" class="otp-input shingaku-input danger-input w-12 h-12 text-center text-xl font-bold rounded">
                             <input type="text" maxlength="1" class="otp-input shingaku-input danger-input w-12 h-12 text-center text-xl font-bold rounded">
@@ -71,24 +70,6 @@
                 </div>
                 <button onclick="verifyOTPAndDelete()" class="w-full clip-btn px-6 py-3 bg-white text-[var(--danger)] hover:bg-neutral-200 text-xs font-bold uppercase tracking-widest transition-colors shadow-lg">
                     Confirm Deletion
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- CROPPER MODAL -->
-    <div id="cropper-modal" class="modal-overlay fixed inset-0 z-[110] flex items-center justify-center p-4">
-        <div class="modal-content glass-card w-full max-w-lg p-6 clip-angle flex flex-col h-[80vh] md:h-auto">
-            <h3 class="font-teko text-2xl text-white uppercase mb-4">Adjust/Crop Your Image</h3>
-            <div class="flex-1 bg-black/50 border border-white/10 mb-4 relative overflow-hidden h-64 md:h-96">
-                <img id="cropper-image" src="" class="max-w-full">
-            </div>
-            <div class="flex justify-end gap-3 mt-auto">
-                <button onclick="closeModal('cropper-modal')" class="clip-btn px-6 py-3 border border-white/20 hover:bg-white/10 text-xs font-bold uppercase tracking-widest text-white transition-colors">
-                    Cancel
-                </button>
-                <button onclick="saveCrop()" class="clip-btn px-6 py-3 bg-[var(--getsuga)] text-black hover:bg-white text-xs font-bold uppercase tracking-widest transition-colors shadow-lg shadow-orange-900/20">
-                    Confirm
                 </button>
             </div>
         </div>
@@ -119,14 +100,8 @@
 
     <!-- PHOTO MENU -->
     <div id="photo-menu" class="hidden absolute z-50 w-48 bg-black border border-white/10 shadow-xl clip-angle">
-        <button onclick="triggerFileSelect()" class="w-full text-left px-4 py-3 text-xs font-mono text-neutral-300 hover:text-white hover:bg-white/5 border-b border-white/5 flex items-center gap-2">
-            <i data-lucide="upload" class="w-3 h-3"></i> Upload Photo
-        </button>
-        <button onclick="openAvatarModal()" class="w-full text-left px-4 py-3 text-xs font-mono text-neutral-300 hover:text-white hover:bg-white/5 border-b border-white/5 flex items-center gap-2">
+        <button onclick="openAvatarModal()" class="w-full text-left px-4 py-3 text-xs font-mono text-neutral-300 hover:text-white hover:bg-white/5 flex items-center gap-2">
             <i data-lucide="grid" class="w-3 h-3"></i> Choose Avatar
-        </button>
-        <button onclick="handleRemovePhoto()" class="w-full text-left px-4 py-3 text-xs font-mono text-[var(--danger)] hover:bg-[var(--danger)]/10 flex items-center gap-2">
-            <i data-lucide="trash-2" class="w-3 h-3"></i> Remove Photo
         </button>
     </div>
 
@@ -207,7 +182,6 @@
                                 <button onclick="togglePhotoMenu(event)" class="text-[10px] md:text-xs font-bold font-mono text-black bg-[var(--reishi)] hover:bg-white transition-colors px-4 py-2 rounded-sm uppercase tracking-wider clip-btn relative shadow-[0_0_10px_rgba(0,210,255,0.2)]">
                                     Change Photo
                                 </button>
-                                <input type="file" id="photo-upload" class="hidden" accept="image/*" onchange="handlePhotoUpload(this)">
                             </div>
                         </div>
 
@@ -344,24 +318,24 @@
                             <!-- New Clan Invite -->
                             <div class="flex items-center justify-between p-4 border border-white/5 bg-white/[0.02] rounded-sm">
                                 <div><h4 class="text-white font-bold text-xs md:text-sm uppercase">New Clan Invite</h4><p class="text-neutral-500 text-[10px] md:text-xs font-mono">Get notified when you receive a clan invitation.</p></div>
-                                <div class="relative inline-block w-12 mr-2 align-middle select-none"><input type="checkbox" checked="{{var1}}" name="toggle" id="toggle-clan-invite" onclick="playClickSound(); updateClanNDB();" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer border-neutral-700 checked:right-0 checked:border-[var(--reishi)] transition-all duration-300"/><label for="toggle-clan-invite" class="toggle-label block overflow-hidden h-6 rounded-full bg-neutral-800 cursor-pointer"></label></div>
+                                <div class="relative inline-block w-12 mr-2 align-middle select-none"><input type="checkbox" checked="" name="toggle" id="toggle-clan-invite" onclick="playClickSound(); updateClanNDB();" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer border-neutral-700 checked:right-0 checked:border-[var(--reishi)] transition-all duration-300"/><label for="toggle-clan-invite" class="toggle-label block overflow-hidden h-6 rounded-full bg-neutral-800 cursor-pointer"></label></div>
                             </div>
 
                             <!-- Upcoming Exams -->
                             <div class="flex items-center justify-between p-4 border border-white/5 bg-white/[0.02] rounded-sm">
                                 <div><h4 class="text-white font-bold text-xs md:text-sm uppercase">Upcoming Exams</h4><p class="text-neutral-500 text-[10px] md:text-xs font-mono">Get remthinded about approaching exam dates.</p></div>
-                                <div class="relative inline-block w-12 mr-2 align-middle select-none"><input type="checkbox" checked="{{var2}}" name="toggle" id="toggle-exams" onclick="playClickSound(); updateExamNDB();" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer border-neutral-700 checked:right-0 checked:border-[var(--reishi)] transition-all duration-300"/><label for="toggle-exams" class="toggle-label block overflow-hidden h-6 rounded-full bg-neutral-800 cursor-pointer"></label></div>
+                                <div class="relative inline-block w-12 mr-2 align-middle select-none"><input type="checkbox" checked="" name="toggle" id="toggle-exams" onclick="playClickSound(); updateExamNDB();" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer border-neutral-700 checked:right-0 checked:border-[var(--reishi)] transition-all duration-300"/><label for="toggle-exams" class="toggle-label block overflow-hidden h-6 rounded-full bg-neutral-800 cursor-pointer"></label></div>
                             </div>
 
                             <!-- To-Do List Remaining -->
                             <div class="p-4 border border-white/5 bg-white/[0.02] rounded-sm space-y-3">
                                 <div class="flex items-center justify-between">
                                     <div><h4 class="text-white font-bold text-xs md:text-sm uppercase">To-Do List Remaining</h4><p class="text-neutral-500 text-[10px] md:text-xs font-mono">Daily reminder for incomplete to-do items.</p></div>
-                                    <div class="relative inline-block w-12 mr-2 align-middle select-none"><input type="checkbox" checked="{{var3}}" name="toggle" id="toggle-todo" onclick="playClickSound(); toggleTodoTime(); updateTodoTimeNDB();" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer border-neutral-700 checked:right-0 checked:border-[var(--reishi)] transition-all duration-300"/><label for="toggle-todo" class="toggle-label block overflow-hidden h-6 rounded-full bg-neutral-800 cursor-pointer"></label></div>
+                                    <div class="relative inline-block w-12 mr-2 align-middle select-none"><input type="checkbox" checked="" name="toggle" id="toggle-todo" onclick="playClickSound(); toggleTodoTime(); updateTodoTimeNDB();" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer border-neutral-700 checked:right-0 checked:border-[var(--reishi)] transition-all duration-300"/><label for="toggle-todo" class="toggle-label block overflow-hidden h-6 rounded-full bg-neutral-800 cursor-pointer"></label></div>
                                 </div>
                                 <div id="todo-time-picker" class="hidden flex items-center gap-3 pt-2 border-t border-white/5">
                                     <label class="text-[10px] font-mono text-neutral-500 uppercase tracking-widest whitespace-nowrap">Notify At</label>
-                                    <input type="time" id="todo-notify-time" class="shingaku-input editable p-2 rounded-sm text-sm font-bold tracking-widest font-mono text-center w-32" value="20:00">
+                                    <input type="time" id="todo-notify-time" class="shingaku-input editable p-2 rounded-sm text-sm font-bold tracking-widest font-mono text-center w-32" value="20:00" onchange="updateTodoTimeNDB()">
                                     <p class="text-[10px] font-mono text-neutral-600 hidden md:block">Set your preferred reminder time.</p>
                                 </div>
                             </div>
@@ -384,11 +358,12 @@
                                 <p class="text-neutral-500 text-[10px] md:text-xs font-mono mt-1">Allow friends to ring your phone remotely.</p>
                             </div>
                             <div class="relative inline-block w-12 mr-2 align-middle select-none">
-                                <input type="checkbox" name="wake-master" id="wake-master" onclick="playClickSound()" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer border-neutral-700 checked:right-0 checked:border-[var(--reishi)] transition-all duration-300" checked/>
+                                <input type="checkbox" name="wake-master" id="wake-master" onclick="playClickSound(); toggleWakeSection()" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer border-neutral-700 checked:right-0 checked:border-[var(--reishi)] transition-all duration-300"/>
                                 <label for="wake-master" class="toggle-label block overflow-hidden h-6 rounded-full bg-neutral-800 cursor-pointer"></label>
                             </div>
                         </div>
 
+                        <div id="wake-settings-body" class="space-y-6 md:space-y-8 transition-all duration-300 hidden">
                         <!-- Schedule -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                             <div class="space-y-2 md:space-y-4">
@@ -408,21 +383,21 @@
                             <label class="text-[10px] md:text-xs font-mono text-neutral-500 uppercase tracking-widest block">Who Can Ring You</label>
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                 <label class="cursor-pointer group" onclick="playClickSound()">
-                                    <input type="radio" name="wake-access" class="peer hidden" value="everyone">
+                                    <input id="every" type="radio" name="wake-access" class="peer hidden" value="everyone">
                                     <div class="border border-white/10 p-4 text-center clip-angle hover:bg-white/5 transition-all peer-checked:border-[var(--reishi)] peer-checked:bg-[var(--reishi)]/10 peer-checked:shadow-[0_0_15px_rgba(0,210,255,0.1)]">
                                         <i data-lucide="globe" class="w-5 h-5 mx-auto mb-2 text-neutral-500 peer-checked:text-[var(--reishi)]"></i>
                                         <div class="text-xs font-bold uppercase tracking-wide text-neutral-400">Everyone</div>
                                     </div>
                                 </label>
                                 <label class="cursor-pointer group" onclick="playClickSound()">
-                                    <input type="radio" name="wake-access" class="peer hidden" value="friends" checked>
+                                    <input id="friends" type="radio" name="wake-access" class="peer hidden" value="friends" checked>
                                     <div class="border border-white/10 p-4 text-center clip-angle hover:bg-white/5 transition-all peer-checked:border-[var(--reishi)] peer-checked:bg-[var(--reishi)]/10 peer-checked:shadow-[0_0_15px_rgba(0,210,255,0.1)]">
                                         <i data-lucide="users" class="w-5 h-5 mx-auto mb-2 text-neutral-500 peer-checked:text-[var(--reishi)]"></i>
                                         <div class="text-xs font-bold uppercase tracking-wide text-neutral-400">Friends Only</div>
                                     </div>
                                 </label>
                                 <label class="cursor-pointer group" onclick="playClickSound()">
-                                    <input type="radio" name="wake-access" class="peer hidden" value="nobody">
+                                    <input id="nobody" type="radio" name="wake-access" class="peer hidden" value="nobody">
                                     <div class="border border-white/10 p-4 text-center clip-angle hover:bg-white/5 transition-all peer-checked:border-[var(--reishi)] peer-checked:bg-[var(--reishi)]/10 peer-checked:shadow-[0_0_15px_rgba(0,210,255,0.1)]">
                                         <i data-lucide="shield-off" class="w-5 h-5 mx-auto mb-2 text-neutral-500 peer-checked:text-[var(--reishi)]"></i>
                                         <div class="text-xs font-bold uppercase tracking-wide text-neutral-400">Nobody</div>
@@ -432,43 +407,6 @@
                         </div>
 
                         <!-- Ring Settings -->
-                        <div class="space-y-4 md:space-y-6">
-                            <label class="text-[10px] md:text-xs font-mono text-neutral-500 uppercase tracking-widest block">Ring Behavior</label>
-
-                            <div class="flex items-center justify-between p-4 border border-white/5 bg-white/[0.02] rounded-sm">
-                                <div>
-                                    <h4 class="text-white font-bold text-xs md:text-sm uppercase">Override Silent Mode</h4>
-                                    <p class="text-neutral-500 text-[10px] md:text-xs font-mono mt-1">Ring even when your phone is on silent.</p>
-                                </div>
-                                <div class="relative inline-block w-12 mr-2 align-middle select-none">
-                                    <input type="checkbox" name="wake-override" id="wake-override" onclick="playClickSound()" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer border-neutral-700 checked:right-0 checked:border-[var(--reishi)] transition-all duration-300" checked/>
-                                    <label for="wake-override" class="toggle-label block overflow-hidden h-6 rounded-full bg-neutral-800 cursor-pointer"></label>
-                                </div>
-                            </div>
-
-                            <div class="flex items-center justify-between p-4 border border-white/5 bg-white/[0.02] rounded-sm">
-                                <div>
-                                    <h4 class="text-white font-bold text-xs md:text-sm uppercase">Vibrate Only</h4>
-                                    <p class="text-neutral-500 text-[10px] md:text-xs font-mono mt-1">Vibrate instead of ringing with sound.</p>
-                                </div>
-                                <div class="relative inline-block w-12 mr-2 align-middle select-none">
-                                    <input type="checkbox" name="wake-vibrate" id="wake-vibrate" onclick="playClickSound()" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer border-neutral-700 checked:right-0 checked:border-[var(--reishi)] transition-all duration-300"/>
-                                    <label for="wake-vibrate" class="toggle-label block overflow-hidden h-6 rounded-full bg-neutral-800 cursor-pointer"></label>
-                                </div>
-                            </div>
-
-                            <div class="flex items-center justify-between p-4 border border-white/5 bg-white/[0.02] rounded-sm">
-                                <div>
-                                    <h4 class="text-white font-bold text-xs md:text-sm uppercase">Repeat Ring</h4>
-                                    <p class="text-neutral-500 text-[10px] md:text-xs font-mono mt-1">Ring again after 2 minutes if not dismissed.</p>
-                                </div>
-                                <div class="relative inline-block w-12 mr-2 align-middle select-none">
-                                    <input type="checkbox" name="wake-repeat" id="wake-repeat" onclick="playClickSound()" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer border-neutral-700 checked:right-0 checked:border-[var(--reishi)] transition-all duration-300" checked/>
-                                    <label for="wake-repeat" class="toggle-label block overflow-hidden h-6 rounded-full bg-neutral-800 cursor-pointer"></label>
-                                </div>
-                            </div>
-                        </div>
-
                         <!-- Max Rings Per Day -->
                         <div class="space-y-2 md:space-y-4">
                             <label class="text-[10px] md:text-xs font-mono text-neutral-500 uppercase tracking-widest block">Max Rings Per Day</label>
@@ -479,9 +417,11 @@
                             <p class="text-[10px] font-mono text-neutral-600">Limit how many times friends can ring you in a day.</p>
                         </div>
 
-                        <!-- Save Button -->
+                        </div><!-- end wake-settings-body -->
+
+                        <!-- Save Button (always visible) -->
                         <div class="flex justify-end pt-4 md:pt-8 pb-8">
-                            <button onclick="playClickSound(); showToast('Wake Me Up settings saved.', 'success')" class="clip-btn w-full md:w-auto px-10 py-4 bg-[var(--reishi)] hover:bg-cyan-400 text-black font-bold uppercase tracking-widest text-sm transition-all hover:shadow-[0_0_20px_rgba(0,210,255,0.4)] transform hover:-translate-y-1">
+                            <button onclick="playClickSound();updateWakeMeUp(); showToast('Wake Me Up settings saved.', 'success');location.reload();" class="clip-btn w-full md:w-auto px-10 py-4 bg-[var(--reishi)] hover:bg-cyan-400 text-black font-bold uppercase tracking-widest text-sm transition-all hover:shadow-[0_0_20px_rgba(0,210,255,0.4)] transform hover:-translate-y-1">
                                 Save Settings
                             </button>
                         </div>

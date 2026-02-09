@@ -5,7 +5,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from pymongo import MongoClient
 from dotenv import load_dotenv
 from plugins.database import Users
-from plugins.email import send_email
+from plugins.email import send_email, send_delete_email
 import os, asyncio, time
 from threading import Thread
 from bson import ObjectId
@@ -67,9 +67,26 @@ def load_user(user_id):
     return None
 
 
+
+
 ## DATABASE class
 udb = Users(users)
 
+@app.route("/set_avatar" , methods=["POST"])
+@login_required
+def set_avatar():
+    if request.method == "POST":
+        data = request.get_json()
+        avatar_data = data.get("src")
+        udb.update_avatar(current_user.username, avatar_data)
+        return jsonify({"status": "success"})
+
+@app.route("/get_avatar", methods=["POST"])
+@login_required
+def get_avatar():
+    if request.method == "POST":
+        avatar_data = udb.get_avatar(current_user.username)
+        return jsonify({"status": "success", "src": avatar_data})
 @app.route("/verify-otp", methods=["POST"])
 def verify_otp():
  try:
@@ -178,6 +195,13 @@ def logout():
         logout_user()
         return jsonify({"status": "success"})
     
+@app.route("/get_notifications_settings", methods=["GET"])
+@login_required
+def notification_settings():
+    if request.method == "GET":
+        settings = udb.get_notification_settings(current_user.username)
+        return jsonify({"status": "success", "settings": settings})
+    
 @app.route("/profile", methods=["GET"])
 @login_required
 def profile():
@@ -206,11 +230,35 @@ def update_notifications(function):
         udb.set_clan_notifications(current_user.username, request.get_json().get("allow_clan_invites"))
     
     elif function == "exam_reminders" :
-        udb.set_exam_notification(current_user.username, request.get_json().get("allow_exam_reminders"))
+        udb.set_exam_notification(current_user.username, request.get_json().get("exam_reminders"))
     
     elif function == "todo_time":
         udb.set_todo_time_notifications(current_user.username, request.get_json().get("allow_todo_time"), request.get_json().get("to_do_time"))
-        
+    return jsonify({"status": "success"})
+
+@app.route("/get_wake_me_up_data", methods=["GET"])
+@login_required
+def get_wake_me_up_data():
+    data = udb.get_wake_me_up_data(current_user.username)
+    return jsonify(data)
+
+
+@app.route("/get_wake_me_up_settings", methods=["GET"])
+@login_required
+def get_wake_me_up_settings():
+    data = udb.get_wake_me_up_settings(current_user.username)
+    return jsonify(data)
+
+
+@app.route("/set_wake_me_up", methods=["POST"])
+@login_required
+def set_wake_me_up_data():
+    data = request.get_json()
+    wake_me_up_enabled = data.get("wake_me_up_enabled", False)
+    wake_me_up_settings = data.get("wake_me_up_settings", {})
+    udb.set_wake_me_up_data(current_user.username, wake_me_up_enabled, wake_me_up_settings)
+    return jsonify({"status": "success"})
+
 
 
 @app.route("/update_password", methods=["POST"])
@@ -228,6 +276,53 @@ def update_password():
         return jsonify({"status": "success"})
     else:
         return jsonify({"status": "error"})
+
+@app.route("/delete_account_verify", methods=["POST"])
+@login_required
+def delete_account_verify():
+    try:
+        data = request.get_json()
+        password = data.get("password", "").strip()
+        if not password:
+            return jsonify({"status": "error", "message": "PASSWORD_REQUIRED"})
+        if not check_password_hash(str(current_user.password), password):
+            return jsonify({"status": "error", "message": "INVALID_PASSWORD"})
+        otp = send_delete_email(Secrets.EMAIL, Secrets.APP_PASSWORD, current_user.email)
+        otp_handler.append({
+            "username": current_user.username,
+            "email": current_user.email,
+            "otp": otp,
+            "timestamp": time.time(),
+            "action": "delete_account"
+        })
+        return jsonify({"status": "success", "message": "OTP_SENT"})
+    except Exception as e:
+        print(e)
+        return jsonify({"status": "error", "message": "SERVER_ERROR"})
+
+@app.route("/delete_account_confirm", methods=["POST"])
+@login_required
+def delete_account_confirm():
+    try:
+        data = request.get_json()
+        otp_input = data.get("otp", "").strip()
+        if not otp_input:
+            return jsonify({"status": "error", "message": "OTP_REQUIRED"})
+        for i in otp_handler:
+            if (i.get("action") == "delete_account"
+                and i["username"] == current_user.username
+                and i["email"] == current_user.email
+                and int(i["otp"]) == int(otp_input)
+                and (time.time() - i["timestamp"]) <= 300):
+                udb.delete_user(current_user.username)
+                otp_handler.remove(i)
+                logout_user()
+                return jsonify({"status": "success", "message": "ACCOUNT_DELETED"})
+        return jsonify({"status": "error", "message": "INVALID_OR_EXPIRED_OTP"})
+    except Exception as e:
+        print(e)
+        return jsonify({"status": "error", "message": "SERVER_ERROR"})
+
 if __name__ == "__main__":
     Thread(target=start_otp_bg, daemon=True).start()
     app.run(debug=True)

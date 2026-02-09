@@ -1,7 +1,6 @@
 lucide.createIcons();
 
         // --- GLOBAL STATE ---
-        let cropper = null;
 
         // --- TOGGLE TODO TIME PICKER ---
         function toggleTodoTime() {
@@ -94,11 +93,6 @@ lucide.createIcons();
             }
         });
 
-        function triggerFileSelect() {
-            document.getElementById('photo-upload').click();
-            document.getElementById('photo-menu').classList.add('hidden');
-        }
-
         function handleRemovePhoto() {
             document.getElementById('profile-avatar').src = 'https://ui-avatars.com/api/?name=User&background=111&color=555';
             document.getElementById('nav-avatar').src = 'https://ui-avatars.com/api/?name=User&background=111&color=555';
@@ -115,52 +109,6 @@ lucide.createIcons();
 
         function closeModal(id) {
             document.getElementById(id).classList.remove('active');
-            if (id === 'cropper-modal' && cropper) {
-                cropper.destroy();
-                cropper = null;
-            }
-        }
-
-        /* --- IMAGE CROPPER LOGIC --- */
-        function handlePhotoUpload(input) {
-            const file = input.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const img = document.getElementById('cropper-image');
-                    img.src = e.target.result;
-                    
-                    const modal = document.getElementById('cropper-modal');
-                    modal.classList.add('active');
-                    
-                    // Initialize Cropper
-                    if(cropper) cropper.destroy();
-                    const image = document.getElementById('cropper-image');
-                    cropper = new Cropper(image, {
-                        aspectRatio: 1,
-                        viewMode: 1,
-                        background: false,
-                        modal: true,
-                        autoCropArea: 1,
-                    });
-                };
-                reader.readAsDataURL(file);
-                document.getElementById('photo-menu').classList.add('hidden');
-            }
-            // Reset input so same file can be selected again
-            input.value = '';
-        }
-
-        function saveCrop() {
-            if (!cropper) return;
-            const canvas = cropper.getCroppedCanvas({ width: 256, height: 256 });
-            const croppedDataUrl = canvas.toDataURL();
-            
-            document.getElementById('profile-avatar').src = croppedDataUrl;
-            document.getElementById('nav-avatar').src = croppedDataUrl;
-            
-            closeModal('cropper-modal');
-            showToast("Soul Signature Updated Successfully", 'success');
         }
 
         /* --- PIXEL AVATAR GENERATOR --- */
@@ -211,17 +159,47 @@ lucide.createIcons();
             }
         }
 
+        async function getWakeMeUpData() {
+            const res = await fetch('/get_wake_me_up_data');
+            const data = await res.json();
+            if(data.wake_me_up_enabled) { 
+                document.getElementById('wake-master').checked = true;
+                let res2 = await fetch('/get_wake_me_up_settings');
+                res2 = await res2.json();
+                document.getElementById("wake-start").value = res2.wake_me_up_settings.wake_start || "06:00";
+                document.getElementById("wake-end").value = res2.wake_me_up_settings.wake_end || "09:00";
+                document.getElementById("ring-count").textContent = res2.wake_me_up_settings.ring_count || "3";
+                document.getElementById(res2.wake_me_up_settings.btn_id || "friends").checked = true;
+                toggleWakeSection();
+            }
+            else{
+                document.getElementById('wake-master').checked = false;
+            }
+        }
+
         function selectAvatar(src) {
+            fetch('/set_avatar', {method:"POST" , headers: { "Content-Type": "application/json" },body: JSON.stringify({ src: src })});
             document.getElementById('profile-avatar').src = src;
             document.getElementById('nav-avatar').src = src;
             closeModal('avatar-modal');
             showToast("Spirit Form Updated Successfully", 'success');
         }
 
-        function updateAvatarLive(val) {
-            const src = generatePixelAvatar(val || "user");
-            document.getElementById('profile-avatar').src = src;
-            document.getElementById('nav-avatar').src = src;
+        async function updateAvatarLive(val) {
+            let response = await fetch('/get_avatar', {method:"POST" , headers: { "Content-Type": "application/json" },body: JSON.stringify({ username: val })});
+            response = await response.json();
+            let src;
+            if (response.src)
+            {
+                src = response.src;
+            }
+            else
+            {
+            src = generatePixelAvatar(val || "user");
+            await fetch('/set_avatar', {method:"POST" , headers: { "Content-Type": "application/json" },body: JSON.stringify({ src: src })});
+            }
+            document.getElementById('profile-avatar').src = src; // setting avatar
+            document.getElementById('nav-avatar').src = src; // setting
         }
 
         // --- API FUNCTIONS ---
@@ -230,10 +208,22 @@ lucide.createIcons();
             setTimeout(() => {
                 document.getElementById('loading-screen').style.opacity = '0';
                 setTimeout(() => document.getElementById('loading-screen').style.display = 'none', 800);
-                updateAvatarLive(document.getElementById("username-input").value);
+                updateAvatarLive(document.getElementById("username-input").value); // ye hai line
+                fetch('/get_notifications_settings').then(res => res.json()).then(data => {
+                    if(data.status === "success") {
+                        const settings = data.settings;
+                        document.getElementById("toggle-clan-invite").checked = settings.clan_invites || false;
+                        document.getElementById("toggle-exams").checked = settings.exam_reminders || false;
+                        document.getElementById("toggle-todo").checked = settings.allow_todo_time || false;
+                        if (settings.allow_todo_time) {
+                            document.getElementById("todo-time-picker").classList.remove("hidden");
+                            document.getElementById("todo-notify-time").value = settings.to_do_time || "20:00";
+                        }
+                    }
+                });
+                getWakeMeUpData();
             }, 1500);
         }
-
         async function handleUpdateProfile() {
             playClickSound();
             showToast("Syncing Spirit Data...", 'normal');
@@ -296,38 +286,89 @@ lucide.createIcons();
             document.querySelectorAll('.otp-input').forEach(i => i.value = '');
             step1.classList.remove('hidden');
             step2.classList.add('hidden');
+            // Reset button state
+            const btn = document.getElementById('delete-verify-btn');
+            btn.disabled = false;
+            btn.classList.remove('opacity-60', 'cursor-not-allowed');
+            document.getElementById('delete-verify-text').textContent = 'Verify & Send OTP';
             
             modal.classList.add('active');
         }
 
-        function verifyDeletePassword() {
+        async function verifyDeletePassword() {
             const pass = document.getElementById('delete-password').value;
-            if(pass.length > 0) {
-
-                showToast("Password Verified. Dispatching Hell Butterfly...", 'normal');
-                setTimeout(() => {
-                    document.getElementById('delete-step-1').classList.add('hidden');
-                    document.getElementById('delete-step-2').classList.remove('hidden');
-                    document.querySelector('.otp-input').focus();
-                }, 1000);
-            } else {
+            const btn = document.getElementById('delete-verify-btn');
+            const btnText = document.getElementById('delete-verify-text');
+            if(pass.length === 0) {
                 showToast("Password Required", 'error');
+                return;
+            }
+            // Disable button and show spinner
+            btn.disabled = true;
+            btn.classList.add('opacity-60', 'cursor-not-allowed');
+            btnText.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-4 w-4 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Sending OTP...`;
+            try {
+                const res = await fetch('/delete_account_verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: pass })
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    btnText.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-4 w-4 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> OTP Sent!`;
+                    showToast("Password Verified. Dispatching Hell Butterfly...", 'normal');
+                    setTimeout(() => {
+                        document.getElementById('delete-step-1').classList.add('hidden');
+                        document.getElementById('delete-step-2').classList.remove('hidden');
+                        document.querySelector('.otp-input').focus();
+                    }, 1000);
+                } else if (data.message === 'INVALID_PASSWORD') {
+                    showToast("Invalid Password", 'error');
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-60', 'cursor-not-allowed');
+                    btnText.textContent = 'Verify & Send OTP';
+                } else {
+                    showToast("Verification Failed", 'error');
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-60', 'cursor-not-allowed');
+                    btnText.textContent = 'Verify & Send OTP';
+                }
+            } catch (e) {
+                showToast("Server Error", 'error');
+                btn.disabled = false;
+                btn.classList.remove('opacity-60', 'cursor-not-allowed');
+                btnText.textContent = 'Verify & Send OTP';
             }
         }
 
-        function verifyOTPAndDelete() {
-            // Check OTP inputs (dummy check)
+        async function verifyOTPAndDelete() {
             let otp = "";
             document.querySelectorAll('.otp-input').forEach(i => otp += i.value);
             
-            if(otp.length === 4) {
-                showToast("OTP Verified. Severing Link...", 'error');
-                setTimeout(() => {
-                    alert("Account Deleted. Returning to the World of the Living.");
-                    window.location.href = "login.html"; 
-                }, 1500);
-            } else {
-                showToast("Invalid OTP", 'error');
+            if(otp.length !== 6) {
+                showToast("Enter the complete 6-digit OTP", 'error');
+                return;
+            }
+            showToast("Verifying OTP...", 'normal');
+            try {
+                const res = await fetch('/delete_account_confirm', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ otp: otp })
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    showToast("OTP Verified. Severing Link...", 'error');
+                    setTimeout(() => {
+                        window.location.href = "/";
+                    }, 1500);
+                } else if (data.message === 'INVALID_OR_EXPIRED_OTP') {
+                    showToast("Invalid or Expired OTP", 'error');
+                } else {
+                    showToast("Deletion Failed", 'error');
+                }
+            } catch (e) {
+                showToast("Server Error", 'error');
             }
         }
 
@@ -345,9 +386,28 @@ lucide.createIcons();
             });
         });
 
+        // --- TOGGLE WAKE ME UP SECTION ---
+        function toggleWakeSection() {
+            const checkbox = document.getElementById('wake-master');
+            const body = document.getElementById('wake-settings-body');
+            if (checkbox.checked) {
+                body.classList.remove('hidden');
+                body.style.opacity = '1';
+                body.style.pointerEvents = 'auto';
+            } else {
+                body.classList.add('hidden');
+                body.style.opacity = '0.4';
+                body.style.pointerEvents = 'none';
+            }
+        }
+
         // Initialize
         document.addEventListener("DOMContentLoaded", async () => {
             await fetchUserProfile();
+            // Show time picker if todo toggle is already checked on load
+            toggleTodoTime();
+            // Disable wake section if master toggle is off
+            toggleWakeSection();
         });
 
         function togglePassword(inputId, btn) {
@@ -365,23 +425,61 @@ lucide.createIcons();
             lucide.createIcons(); // Refresh icon
         }
     
-        async function updateClanNDB()
+        function updateClanNDB()
         {
             const btn = document.getElementById("toggle-clan-invite").checked;
-            const response = await fetch('/update/clan', {method:"POST" , headers: { "Content-Type": "application/json" },body: JSON.stringify({ allow_clan_invites: btn })});
+            console.log(btn)
+            fetch('/update/clan', {method:"POST" , headers: { "Content-Type": "application/json" },body: JSON.stringify({ allow_clan_invites: btn })});
             return;
         }
 
-        async function updateTodoTimeNDB()
+        function updateTodoTimeNDB()
         {
             const btn = document.getElementById("toggle-todo").checked;
-            const time = document.getElementById("todo-time").value;
-            const response = await fetch('/update/todo_time', {method:"POST" , headers: { "Content-Type": "application/json" },body: JSON.stringify({ allow_todo_time: btn, to_do_time: time })});
+            let time = null;
+            if (btn){
+                time = document.getElementById("todo-notify-time").value;
+            }
+            fetch('/update/todo_time', {method:"POST" , headers: { "Content-Type": "application/json" },body: JSON.stringify({ allow_todo_time: btn, to_do_time: time })});
             return;
         }
-        async function updateExamNDB()
+        function updateExamNDB()
         {
           const btn = document.getElementById("toggle-exams").checked;
-          const response = await fetch('/update/exam_reminders', {method:"POST" , headers: { "Content-Type": "application/json" },body: JSON.stringify({ exam_reminders: btn })});
+          console.log(btn);
+          fetch('/update/exam_reminders', {method:"POST" , headers: { "Content-Type": "application/json" },body: JSON.stringify({ exam_reminders: btn })});
           return;
+        }
+        function updateWakeMeUp()
+        {   
+            if( !document.getElementById("wake-master").checked)
+            {
+                fetch("/set_wake_me_up", {method: "POST", headers:{"Content-Type": "application/json"}, body:JSON.stringify({
+                    wake_me_up_enabled: false,
+                    wake_me_up_settings:{}
+            })});
+            }
+            else
+            {
+                fetch("/set_wake_me_up" , {method:"POST",headers:{"Content-Type":"application/json"}, body:JSON.stringify({
+                    wake_me_up_enabled: true,
+                    wake_me_up_settings:{
+                        wake_start : document.getElementById("wake-start").value || "06:00",
+                        wake_end : document.getElementById("wake-end").value || "09:00",
+                        ring_count: document.getElementById("ring-count").textContent || "3",
+                        btn_id: getBtnId()
+                    }
+                })});
+            }
+        }
+        function getBtnId()
+        {
+            if (document.getElementById("every").checked)
+                return "every";
+
+            else if (document.getElementById("friends").checked)
+                return "friends";
+            
+            else if (document.getElementById("nobody").checked)
+                return "nobody";
         }
