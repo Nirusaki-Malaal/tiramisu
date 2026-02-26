@@ -323,6 +323,11 @@ def delete_account_confirm():
         print(e)
         return jsonify({"status": "error", "message": "SERVER_ERROR"})
 
+@app.route("/notes")
+@login_required
+def notes():
+    return render_template("notes.html")
+
 if __name__ == "__main__":
     Thread(target=start_otp_bg, daemon=True).start()
     app.run(debug=True)

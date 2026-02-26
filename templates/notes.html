@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Shingaku | Soul Archives</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=Noto+Sans+JP:wght@400;700;900&family=Oswald:wght@300;500;700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/notes.css">
+</head>
+<body>
+
+<!-- ================================================================
+     DESKTOP LAYOUT (md+)
+     ================================================================ -->
+<div id="desktopApp">
+    <!-- Navbar -->
+    <nav class="dk-nav">
+        <div class="flex items-center gap-4">
+            <a href="/" class="flex items-center gap-2 group select-none cursor-pointer" style="text-decoration:none;">
+                <div class="relative w-10 h-10 bg-white/10 clip-button flex items-center justify-center group-hover:bg-orange-500 transition-colors">
+                    <i data-lucide="sword" class="h-5 w-5 text-white"></i>
+                </div>
+                <div class="flex flex-col leading-none">
+                    <span class="text-2xl font-bold tracking-widest heading-font text-white">SHIN<span class="text-orange-500">GAKU</span></span>
+                    <p class="text-[8px] text-neutral-500 font-bold uppercase tracking-widest">Soul Archives</p>
+                </div>
+            </a>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="dk-search-wrap">
+                <i data-lucide="search" class="w-3.5 h-3.5 text-neutral-600 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none z-10"></i>
+                <input id="dkSearch" type="text" placeholder="Search notes, chapters..." oninput="dkSearchFilter()" onfocus="dkSearchFocus()" autocomplete="off"
+                    class="bg-white/[0.03] border border-white/[0.06] rounded-xl pl-9 pr-4 py-2 text-xs font-bold w-72 outline-none text-white focus:border-[var(--reishi)] transition-colors">
+                <div id="dkSearchDropdown" class="dk-search-dropdown custom-scroll"></div>
+            </div>
+            <div class="flex items-center gap-3 pl-4 border-l border-white/[0.06]">
+                <button class="theme-toggle-btn" onclick="toggleNotesTheme()" title="Toggle Theme">
+                    <i data-lucide="sun" class="w-4 h-4 notes-icon-sun hidden"></i>
+                    <i data-lucide="moon" class="w-4 h-4 notes-icon-moon"></i>
+                </button>
+                <button class="w-8 h-8 rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-center text-neutral-500 hover:text-white hover:border-white/10 transition-all" title="Notifications">
+                    <i data-lucide="bell" class="w-4 h-4"></i>
+                </button>
+                <a href="login_student.html" class="w-8 h-8 rounded-full border border-white/10 overflow-hidden hover:border-[var(--getsuga)] transition-colors">
+                    <img src="https://ui-avatars.com/api/?name=Ichigo+K&background=1a1a1a&color=ff6b00&bold=true&size=32" class="w-full h-full object-cover">
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Body -->
+    <div class="flex flex-1 overflow-hidden">
+        <!-- Subject Sidebar (icon rail) -->
+        <aside class="dk-sidebar" id="dkSubjectSidebar">
+            <!-- Populated by JS -->
+        </aside>
+        <!-- Sidebar Toggle -->
+        <button id="sidebarToggleBtn" class="sidebar-toggle-btn" onclick="toggleSidebar()" title="Toggle Sidebar">
+            <i data-lucide="panel-left-close" class="w-4 h-4 sidebar-icon-collapse"></i>
+            <i data-lucide="panel-left-open" class="w-4 h-4 sidebar-icon-expand hidden"></i>
+        </button>
+
+        <!-- Chapter List -->
+        <aside class="dk-chapters" id="dkChapterPanel">
+            <div class="dk-chap-header">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="font-teko text-2xl font-bold text-white uppercase leading-none" id="dkSubjectTitle">Mathematics</h3>
+                    <span class="badge badge-orange" id="dkChapCount">6 chapters</span>
+                </div>
+                <p class="text-[10px] text-neutral-500 font-bold">Select a chapter to view study material</p>
+                <div class="relative mt-3">
+                    <i data-lucide="search" class="w-3 h-3 text-neutral-600 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                    <input id="dkChapSearch" type="text" placeholder="Filter chapters..." oninput="dkChapFilter()"
+                        class="w-full bg-white/[0.04] border border-white/[0.06] rounded-lg pl-8 pr-3 py-2 text-[11px] font-bold outline-none text-white focus:border-[var(--reishi)] transition-colors">
+                </div>
+            </div>
+            <div id="dkChapterList" class="flex-1 overflow-y-auto custom-scroll"></div>
+        </aside>
+        <!-- Chapter Panel Toggle -->
+        <button id="chapterToggleBtn" class="chapter-toggle-btn" onclick="toggleChapterPanel()" title="Toggle Chapters">
+            <i data-lucide="columns-2" class="w-4 h-4 chapter-icon-collapse"></i>
+            <i data-lucide="columns-2" class="w-4 h-4 chapter-icon-expand hidden"></i>
+        </button>
+
+        <!-- Content Area -->
+        <main class="dk-content">
+            <!-- Hero / Header -->
+            <div class="dk-hero">
+                <div class="flex items-center gap-2 mb-3" id="dkBreadcrumb">
+                    <span class="text-[10px] text-neutral-500 font-bold cursor-pointer hover:text-white transition-colors" onclick="dkBreadSubject()">Mathematics</span>
+                    <i data-lucide="chevron-right" class="w-3 h-3 text-neutral-600"></i>
+                    <span class="text-[10px] text-[var(--getsuga)] font-bold">Fundamentals of Algebra</span>
+                </div>
+                <div class="flex items-center justify-between mb-1">
+                    <div>
+                        <h2 class="font-teko text-5xl font-bold text-white uppercase leading-none tracking-wide" id="dkContentTitle">Fundamentals of Algebra</h2>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 mt-3 pb-5">
+                    <span class="badge badge-blue" id="dkModuleBadge">6 modules</span>
+                    <span class="badge badge-green">Updated recently</span>
+                </div>
+            </div>
+            <!-- Stats Strip -->
+            <div class="dk-stats">
+                <div class="dk-stat-item">
+                    <i data-lucide="file-text" class="w-3.5 h-3.5 text-[var(--reishi)]"></i>
+                    <span class="text-[10px] font-bold text-neutral-400" id="dkStatNotes">6 Notes</span>
+                </div>
+                <div class="dk-stat-item">
+                    <i data-lucide="video" class="w-3.5 h-3.5 text-purple-400"></i>
+                    <span class="text-[10px] font-bold text-neutral-400">3 Recordings</span>
+                </div>
+                <div class="dk-stat-item">
+                    <i data-lucide="pen-tool" class="w-3.5 h-3.5 text-green-400"></i>
+                    <span class="text-[10px] font-bold text-neutral-400">2 Practice</span>
+                </div>
+                <div class="flex-1"></div>
+                <div class="dk-stat-item" style="background:transparent; border-color:transparent;">
+                    <i data-lucide="clock" class="w-3.5 h-3.5 text-neutral-600"></i>
+                    <span class="text-[10px] font-bold text-neutral-500">Last studied 2h ago</span>
+                </div>
+            </div>
+            <!-- Tabs -->
+            <div class="dk-tabs" id="dkTabBar">
+                <button class="dk-tab active" onclick="dkSwitchTab('notes', this)">Notes</button>
+                <button class="dk-tab" onclick="dkSwitchTab('recordings', this)">Recordings</button>
+                <button class="dk-tab" onclick="dkSwitchTab('practice', this)">Practice</button>
+            </div>
+            <!-- Resource Grid -->
+            <div id="dkResourceGrid" class="flex-1 overflow-y-auto p-8 custom-scroll">
+                <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-5" id="dkCards"></div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- ================================================================
+     MOBILE LAYOUT (<768px)
+     ================================================================ -->
+<div id="mobileApp">
+    <!-- Screen 1: Chapters -->
+    <div id="mobScreenChapters" class="mob-screen center" style="z-index:10;">
+        <!-- Header -->
+        <div class="mob-hdr">
+            <a href="/" class="mob-back" style="text-decoration:none;">
+                <div class="relative w-8 h-8 bg-white/10 clip-button flex items-center justify-center">
+                    <i data-lucide="sword" class="h-4 w-4 text-white"></i>
+                </div>
+            </a>
+            <div class="flex-1 min-w-0">
+                <h1 class="heading-font text-base text-white leading-none tracking-widest">SHIN<span class="text-orange-500">GAKU</span></h1>
+                <p class="text-[9px] text-neutral-500 font-bold mt-0.5">Soul Archives</p>
+            </div>
+            <button id="mobGridBtn" class="mob-grid-btn" title="Subjects" onclick="mobToggleSubjectPicker()">
+                <i data-lucide="layout-grid" class="w-4 h-4"></i>
+                <span class="dot-ping"></span>
+            </button>
+            <button class="w-8 h-8 rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-center text-neutral-500" title="Search" onclick="mobToggleSearch()">
+                <i data-lucide="search" class="w-4 h-4"></i>
+            </button>
+            <button class="theme-toggle-btn" onclick="toggleNotesTheme()" title="Toggle Theme">
+                <i data-lucide="sun" class="w-4 h-4 notes-icon-sun hidden"></i>
+                <i data-lucide="moon" class="w-4 h-4 notes-icon-moon"></i>
+            </button>
+            <a href="login_student.html" class="w-8 h-8 rounded-full border border-white/10 overflow-hidden flex-shrink-0">
+                <img src="https://ui-avatars.com/api/?name=Ichigo+K&background=1a1a1a&color=ff6b00&bold=true&size=32" class="w-full h-full object-cover">
+            </a>
+        </div>
+        <!-- Search (hidden by default) -->
+        <div id="mobSearchWrap" class="hidden">
+            <div class="mob-search">
+                <i data-lucide="search" class="w-4 h-4 text-neutral-500 flex-shrink-0"></i>
+                <input type="text" placeholder="Search chapters..." id="mobSearchInput" oninput="mobFilterChapters()">
+            </div>
+        </div>
+        <!-- Subject Picker Overlay -->
+        <div id="mobSubjectOverlay" class="mob-subject-overlay">
+            <div class="backdrop" onclick="mobCloseSubjectPicker()"></div>
+            <div class="mob-subject-sheet">
+                <div class="mob-sheet-handle"></div>
+                <div class="mob-sheet-title"><span class="title-dot"></span>Choose Subject</div>
+                <div class="mob-subject-grid" id="mobSubjectGrid">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </div>
+        <!-- Active Subject Indicator -->
+        <div id="mobActiveSubjectBar" class="flex items-center gap-3 px-4 py-2 flex-shrink-0 border-b border-white/[0.06] bg-[var(--void-light)]">
+            <div id="mobActiveSubIcon" class="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"></div>
+            <span id="mobActiveSubLabel" class="text-xs font-bold text-white flex-1"></span>
+            <button class="text-[10px] font-bold text-[var(--getsuga)] uppercase tracking-wider" onclick="mobToggleSubjectPicker()">Change</button>
+        </div>
+        <!-- Subject Info Card -->
+        <div class="px-4 pt-4 pb-2 flex-shrink-0">
+            <div class="flex items-center justify-between">
+                <h2 class="font-teko text-2xl font-bold text-white uppercase" id="mobSubTitle">Mathematics</h2>
+                <span class="badge badge-orange" id="mobChapCount">6 chapters</span>
+            </div>
+        </div>
+        <!-- Chapter Cards -->
+        <div id="mobChapterList" class="flex-1 overflow-y-auto pt-2 pb-20 scrollbar-hide">
+            <!-- Populated by JS -->
+        </div>
+    </div>
+
+    <!-- Screen 2: Content (Resources) -->
+    <div id="mobScreenContent" class="mob-screen off-right" style="z-index:20;">
+        <div class="mob-hdr">
+            <div class="mob-back" onclick="mobGoBack()">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+                <h1 class="font-coc text-sm text-white leading-none truncate" id="mobContentTitle">Fundamentals of Algebra</h1>
+                <p class="text-[9px] text-neutral-500 font-bold mt-0.5" id="mobContentSub">Mathematics &bull; 6 modules</p>
+            </div>
+        </div>
+        <!-- Hero Banner -->
+        <div class="relative px-4 py-5 flex-shrink-0" style="background: linear-gradient(135deg, rgba(0,210,255,0.06), rgba(255,107,0,0.04));">
+            <div class="flex items-center gap-3">
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-[var(--reishi)] to-cyan-700 flex items-center justify-center flex-shrink-0">
+                    <i data-lucide="book-open" class="w-6 h-6 text-black"></i>
+                </div>
+                <div class="min-w-0">
+                    <h2 class="font-teko text-xl font-bold text-white uppercase leading-tight" id="mobHeroTitle">Fundamentals of Algebra</h2>
+                    <div class="flex items-center gap-2 mt-1">
+                        <span class="badge badge-blue" id="mobHeroModules">6 modules</span>
+                        <span class="badge badge-green">Updated</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Tabs -->
+        <div class="mob-tab-row" id="mobTabRow">
+            <button class="mob-tab active" onclick="mobSwitchTab('notes', this)">Notes</button>
+            <button class="mob-tab" onclick="mobSwitchTab('recordings', this)">Recordings</button>
+            <button class="mob-tab" onclick="mobSwitchTab('practice', this)">Practice</button>
+        </div>
+        <!-- Resource List -->
+        <div id="mobResourceList" class="flex-1 overflow-y-auto px-4 py-4 scrollbar-hide"></div>
+    </div>
+</div>
+
+<script src="/static/js/notes.js"></script>
+
+</body>
+</html>
