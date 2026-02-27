@@ -1,5 +1,35 @@
 lucide.createIcons();
 
+        // --- THEME TOGGLE ---
+        function toggleProfileTheme() {
+            playClickSound();
+            document.body.classList.toggle('light-theme');
+            const isLight = document.body.classList.contains('light-theme');
+            localStorage.setItem('profileTheme', isLight ? 'light' : 'dark');
+            updateThemeIcons();
+        }
+
+        function updateThemeIcons() {
+            const isLight = document.body.classList.contains('light-theme');
+            const darkIcon = document.getElementById('theme-icon-dark');
+            const lightIcon = document.getElementById('theme-icon-light');
+            if (darkIcon && lightIcon) {
+                darkIcon.classList.toggle('hidden', isLight);
+                lightIcon.classList.toggle('hidden', !isLight);
+            }
+        }
+
+        function restoreProfileTheme() {
+            const saved = localStorage.getItem('profileTheme');
+            if (saved === 'light') {
+                document.body.classList.add('light-theme');
+            }
+            updateThemeIcons();
+        }
+
+        // Restore theme immediately
+        restoreProfileTheme();
+
         // --- GLOBAL STATE ---
 
         // --- TOGGLE TODO TIME PICKER ---

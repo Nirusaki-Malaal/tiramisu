@@ -3,3 +3,6 @@ plugins/__pycache__/
 
 # Virtual Environment
 venv/
+
+# Configs
+config.env
